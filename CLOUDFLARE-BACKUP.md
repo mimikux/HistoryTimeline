@@ -1,38 +1,52 @@
-# History Timeline — Cloudflare production backup verification
+# History Timeline — Cloudflare production recovery record
 
-## Source of truth
+## Current deployment (2026-10-25)
 
-- Cloudflare Pages project: `history-timeline`
-- Production URL: https://history-timeline-cfb.pages.dev/
-- GitHub backup: https://github.com/mimikux/HistoryTimeline
-- Supabase application backend: independent of GitHub frontend backup.
+| Field | Verified value |
+|---|---|
+| Pages project | `history-timeline` |
+| Domain | https://history-timeline-cfb.pages.dev/ |
+| Version | `v9.2-cloud-1.7` |
+| Production branch | `main` |
+| Production deployment ID | `c549a2c7-18ff-4391-8f2c-a65e48c34608` |
+| Production API state | `success`, `uses_functions:true` |
+| Preview deployment ID | `b1be4381-3283-4bc4-b6a6-9df432897b63` |
+| Previous production / rollback candidate | `94216ead-8285-4d7d-b628-97178897634c` |
+| GitHub frontend `index.html` blob SHA | `f8a24121306de23745cd9bc78ea37e0e877fb3ce` |
+| Worker bundle source | `deployment/_worker.js` (559,360 characters) |
+| Supabase post-release read-only count | 356 events, 5 continents |
 
-## Initial backup captured 2026-10-24
+## What is backed up
 
-The production root URL returned a complete single-document HTML application (346,109 UTF-8 bytes), containing one embedded `<style>` block and one embedded `<script>` block, with no local separate CSS/JavaScript asset references. The application title was `History Atlas v9.2 Cloud 1.0`; the response header identified `x-history-build: v9.2-cloud-1.6`.
+- `index.html` is the entire Cloud 1.7 frontend: CSS, HTML and embedded application JS. Includes search, geographic groups, Owner device access and direct Supabase API functionality.
+- `deployment/_worker.js` is the **actual uploaded Cloud 1.7 Pages Worker source** used by Preview and Production. It embeds the `index.html` document, compiles the same inline JS inside an uninvoked function, and serves HTML for `GET`/`HEAD` while adding `x-history-build`. The exact Worker source was reproduced from the verified candidate and stored after successful production release.
+- GitHub commit history retains the previous v1.6 frontend and earlier backups; Cloudflare has historical deployments.
 
-Requests for `/index.html`, `/app.js` and `/sw.js` returned the same HTML fallback content; **these were not separate JavaScript or service worker files** and should not be committed as invented assets.
+## Verification completed
 
-The exact published HTML was stored in `index.html` and fetched back from GitHub with an exact textual comparison against the live production snapshot (passed).
+1. Inspected previous Cloudflare canonical production before deployment.
+2. Used Cloudflare Pages Direct Upload API with `manifest={}` and full `_worker.js`, first to a Preview branch, then `main`.
+3. Preview reported `success` and `uses_functions:true`; client JS syntax was parsed during Worker compilation.
+4. Production returned `environment:production`, `branch:main`, `success`, `uses_functions:true` and became the canonical deployment.
+5. Queried Supabase read-only: 356 event rows and five continents, without altering the data.
+6. Copied exact tested app frontend to GitHub `main`; release source Git blob matched candidate SHA.
 
-## Limitations — do not claim a completed disaster-recovery drill
+## Important limitations
 
-Cloudflare previously reported that History Timeline is deployed with **Pages Functions** and no listed static deployment assets. The deployed original Pages Function / Worker source could **not** be independently retrieved from the public site. This repository therefore preserves the *effective frontend response*, not the original Pages Function authoring project.
+- The legacy production Pages Worker/Functions source **was never independently retrieved**. The deployed Cloud 1.7 Worker is an explicitly authored self-contained wrapper for the known frontend. If the old release had private worker-only routes not visible from client code, their behavior was not reproduced or verified. Do not claim a full legacy Worker source recovery.
+- The Cloudflare tool environment blocked direct external-domain HTTP/browser checks of `*.pages.dev`. Therefore **browser UI inspection, real Owner login and authenticated cross-device CRUD** were not independently performed here. Cloudflare's `success` is a deployment and script validation result, not a substitute for those checks.
+- The GitHub repo is a source backup, **not** the auto-deployment origin for this Pages project.
+- Postgres schema, RLS, Supabase Auth, Edge Functions, secrets, backup snapshots, and Apps Script are stored separately. GitHub source alone is not a complete disaster recovery package.
 
-A restore using `index.html` alone may recover the interface but must be tested against its Supabase APIs, authentication, security policies and any worker-only routes. It does not back up the PostgreSQL schema, Auth configuration, Supabase Edge Functions, private content, Google Apps Script, secrets, or Google Drive backup history.
+## Release and rollback procedure
 
-## Release process (for all ChatGPT development windows)
+1. Read Cloudflare Pages `canonical_deployment` and verify project and production branch, rather than `latest_deployment` which can refer to Preview.
+2. Make targeted changes to `index.html`; compile a Pages `_worker.js` from the full client HTML, preserving the same Supabase endpoint configuration.
+3. Create a unique Preview branch using Cloudflare Pages Direct Upload; confirm status `success`, function mode, and where available test Preview on an actual browser.
+4. Only after validating Preview, deploy exact candidate to `main` and confirm it becomes canonical.
+5. Keep release identifiers, update `index.html` and `deployment/_worker.js` backup in GitHub; verify readback.
+6. If release causes a regression, consider a Cloudflare Pages **rollback** to the previous successful production deployment `94216ead-8285-4d7d-b628-97178897634c` after confirming its status and the requested revert; this does **not** roll back Supabase data.
 
-1. Inspect live Cloudflare production; do not trust older GitHub sources.
-2. Edit and deploy to Cloudflare Preview via the official Cloudflare connection where available.
-3. Verify Preview, deploy Production, and verify the live version / data connectivity.
-4. Copy the verified effective production frontend to GitHub and link its Cloudflare release ID or build identifier.
-5. If Pages Functions implement essential behavior, back up their actual source and route configuration through an authorized, verified source method. Do not invent or overwrite missing functions.
-6. Compare saved GitHub files with served production bytes or digests. On any mismatch or authentication blockage, stop and report it, without touching the working site.
-7. Treat GitHub as backup only; GitHub Pages/Git integrations must not silently deploy production.
+## Security
 
-## Safety
-
-- Do not include private tokens or production secrets in this public GitHub repository.
-- Production Supabase database data is not modified or overwritten during source backups.
-- Repo privacy is currently controlled by its GitHub settings; if the owner wishes private backups, change the visibility to Private before storing nonpublic artifacts.
+Do not add service-role secrets, OAuth access tokens, personal email data or unredacted private Supabase records to this repository. Repository was previously configured as public.
