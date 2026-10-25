@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f5f3ef">
-<title>歷史時空軸 · History Atlas v9.2 Cloud 1.0</title>
+<meta name="history-build" content="v9.2-cloud-1.7">
+<title>歷史時空軸 · History Atlas v9.2 Cloud 1.7</title>
 <style>
 :root{color-scheme:light;--ink:#3c4850;--muted:#819098;--line:#e5e7e3;--bg:#f5f3ef;--paper:#fff;--sage:#8fa69e;--blue:#8fa6b5;--sand:#b8a58c;--rose:#bc9d98;--purple:#aaa0b4;--shadow:0 14px 45px rgba(61,71,73,.055)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:14px;line-height:1.55}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #839faf;outline-offset:2px}a{color:#5d8191;text-decoration:none}a:hover{text-decoration:underline}
@@ -472,13 +473,60 @@ body:not(.history-owner) #deleteEvent,body:not(.history-owner) #saveEvent{displa
 /* v9.2 Cloud 1.6 — settings gear refinement B, following owner-supplied eight-tooth outline. */
 #historySettingsBtn svg{width:19px;height:19px;display:block;flex:none}
 @media(max-width:740px){.masthead #historySettingsBtn svg{width:18px;height:18px}}
+.geo-group{flex:1 1 100%;border:1px solid #e6ece8;border-radius:10px;background:#fcfdfb;padding:4px 7px;margin-top:4px}
+.geo-heading{display:flex;align-items:center;gap:5px}
+.geo-heading button{border:0;background:transparent;color:#617b71;padding:5px;font-size:12px}
+.geo-heading button:first-child{flex:1;text-align:left;font-weight:720}
+.geo-heading .geo-filter{border:1px solid #dfe8e1;border-radius:7px;background:#f4f8f4;font-size:10px}
+.geo-heading .geo-filter.active{background:#dfebe1;border-color:#a8c6ad;color:#477158}
+.geo-children{display:flex;flex-wrap:wrap;gap:6px;padding:6px 2px}
+#historySearchBtn{width:35px;min-width:35px;height:35px;min-height:35px;border-radius:10px;padding:7px}
+#historySearchBtn svg{width:18px;height:18px}
+.masthead #historySearchBtn{grid-column:2;grid-row:1}
+@media(max-width:740px){.masthead .head-actions{display:grid;grid-template-columns:35px 35px;grid-template-rows:35px auto;gap:7px;align-content:space-between}
+.masthead #historySearchBtn{grid-column:1;grid-row:1}
+.masthead #historySettingsBtn{grid-column:2;grid-row:1}
+.masthead #addEventTop{grid-column:1 / span 2;grid-row:2;justify-self:end}}
+/* Cloud 1.7 header: four slots, no overlap between Export and Search on desktop */
+@media(min-width:741px){
+ .masthead .head-actions{grid-template-columns:repeat(4,auto)}
+ .masthead #importBtn{grid-column:1;grid-row:1}
+ .masthead #exportBtn{grid-column:2;grid-row:1}
+ .masthead #historySearchBtn{grid-column:3;grid-row:1}
+ .masthead #historySettingsBtn{grid-column:4;grid-row:1}
+ .masthead #addEventTop{grid-column:4;grid-row:2}
+}
+.scale-marks span{min-width:0;flex:1;width:auto}
+@media(max-width:740px){
+ .masthead .head-actions{grid-template-columns:35px 35px;grid-template-rows:35px auto}
+ .masthead #historySearchBtn{grid-column:1;grid-row:1}
+ .masthead #historySettingsBtn{grid-column:2;grid-row:1}
+ .masthead #addEventTop{grid-column:1 / span 2;grid-row:2}
+}
+.geo-group.geo-parent{background:#f4f8f5;margin-top:7px;border-color:#d2e0d5}
+.geo-parent>.geo-children{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:6px 0}
+.geo-parent>.geo-children.hidden,.geo-child>.geo-children.hidden{display:none}
+.geo-group.geo-child{margin:2px 0 0 9px;background:#fff;border-color:#e0eae3}
+.geo-child>.geo-children{display:flex;flex-wrap:wrap;gap:5px;padding:5px 1px}
+.era-region-label[data-toggle-geo]{background:#ebf3ed;color:#426958;border-left:3px solid #a3c3ad}
+.era-region-label[data-toggle-geo]:hover{background:#dbece0}
+.era-region-label[data-toggle-geo] small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-search-dialog{display:flex;flex-direction:column;gap:13px}
+.history-search-input-row{display:flex;gap:8px;align-items:center}
+.history-search-input-row input{flex:1;min-width:0;border:1px solid #d5e1d8;background:#f8faf8;border-radius:11px;padding:12px 13px;color:#50685d;outline:none}
+.history-search-input-row input:focus{border-color:#82aa93;box-shadow:0 0 0 3px #89b8a020}
+.history-search-results{max-height:48vh;overflow:auto;display:flex;flex-direction:column;gap:7px}
+.history-search-result{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:1px solid #e5ece6;background:#fff;border-radius:10px;padding:11px 13px;color:#4e665b;text-align:left;min-width:0}
+.history-search-result:hover{background:#f0f5f1;border-color:#b9d2bf}
+.history-search-result strong{font-size:14px;font-weight:710;overflow-wrap:anywhere}
+.history-search-result small{color:#8b9f94;font-size:11px;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
 <div class="shell">
  <header class="masthead">
   <div class="brand"><div class="brand-mark"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none"><path d="M5 6v18M25 6v18M5 10h20M5 20h20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="10" r="2.8" fill="currentColor"/><circle cx="20" cy="20" r="2.8" fill="currentColor"/></svg></div><div><div class="eyebrow">HISTORY ATLAS · WORLD CHRONICLE</div><div class="brand-title">歷史時空軸</div></div></div>
-  <div class="head-actions"><button class="button history-settings-trigger" id="historySettingsBtn" type="button" aria-label="開啟設定" aria-haspopup="dialog" title="設定"><svg viewBox="0 0 100 100" fill="none" stroke="#5b746d" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 35.25 19.43 Q 36.99 18.59 38.81 17.95 Q 40.63 17.32 41.41 14.45 Q 42.18 11.59 43.38 10.17 Q 44.57 8.76 50.00 8.76 Q 55.43 8.76 56.62 10.17 Q 57.82 11.59 58.59 14.45 Q 59.37 17.32 61.19 17.95 Q 63.01 18.59 64.75 19.43 Q 66.48 20.26 69.06 18.79 Q 71.64 17.31 73.48 17.15 Q 75.32 17.00 79.16 20.84 Q 83.00 24.68 82.85 26.52 Q 82.69 28.36 81.21 30.94 Q 79.74 33.52 80.57 35.25 Q 81.41 36.99 82.05 38.81 Q 82.68 40.63 85.55 41.41 Q 88.41 42.18 89.83 43.38 Q 91.24 44.57 91.24 50.00 Q 91.24 55.43 89.83 56.62 Q 88.41 57.82 85.55 58.59 Q 82.68 59.37 82.05 61.19 Q 81.41 63.01 80.57 64.75 Q 79.74 66.48 81.21 69.06 Q 82.69 71.64 82.85 73.48 Q 83.00 75.32 79.16 79.16 Q 75.32 83.00 73.48 82.85 Q 71.64 82.69 69.06 81.21 Q 66.48 79.74 64.75 80.57 Q 63.01 81.41 61.19 82.05 Q 59.37 82.68 58.59 85.55 Q 57.82 88.41 56.62 89.83 Q 55.43 91.24 50.00 91.24 Q 44.57 91.24 43.38 89.83 Q 42.18 88.41 41.41 85.55 Q 40.63 82.68 38.81 82.05 Q 36.99 81.41 35.25 80.57 Q 33.52 79.74 30.94 81.21 Q 28.36 82.69 26.52 82.85 Q 24.68 83.00 20.84 79.16 Q 17.00 75.32 17.15 73.48 Q 17.31 71.64 18.79 69.06 Q 20.26 66.48 19.43 64.75 Q 18.59 63.01 17.95 61.19 Q 17.32 59.37 14.45 58.59 Q 11.59 57.82 10.17 56.62 Q 8.76 55.43 8.76 50.00 Q 8.76 44.57 10.17 43.38 Q 11.59 42.18 14.45 41.41 Q 17.32 40.63 17.95 38.81 Q 18.59 36.99 19.43 35.25 Q 20.26 33.52 18.79 30.94 Q 17.31 28.36 17.15 26.52 Q 17.00 24.68 20.84 20.84 Q 24.68 17.00 26.52 17.15 Q 28.36 17.31 30.94 18.79 Q 33.52 20.26 35.25 19.43 Z"/><circle cx="50" cy="50" r="19"/></svg><span>設定</span></button><button class="button secondary" id="importBtn" type="button">匯入資料</button><button class="button secondary" id="exportBtn" type="button">匯出備份 ↗</button><button class="button primary" id="addEventTop" type="button">＋ 新增事件</button><input class="hidden" type="file" id="fileInput" accept=".json,application/json" aria-label="匯入備份 JSON"></div>
+  <div class="head-actions"><button class="button" id="historySearchBtn" type="button" aria-label="搜尋歷史事件" title="搜尋歷史事件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><button class="button history-settings-trigger" id="historySettingsBtn" type="button" aria-label="開啟設定" aria-haspopup="dialog" title="設定"><svg viewBox="0 0 100 100" fill="none" stroke="#5b746d" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 35.25 19.43 Q 36.99 18.59 38.81 17.95 Q 40.63 17.32 41.41 14.45 Q 42.18 11.59 43.38 10.17 Q 44.57 8.76 50.00 8.76 Q 55.43 8.76 56.62 10.17 Q 57.82 11.59 58.59 14.45 Q 59.37 17.32 61.19 17.95 Q 63.01 18.59 64.75 19.43 Q 66.48 20.26 69.06 18.79 Q 71.64 17.31 73.48 17.15 Q 75.32 17.00 79.16 20.84 Q 83.00 24.68 82.85 26.52 Q 82.69 28.36 81.21 30.94 Q 79.74 33.52 80.57 35.25 Q 81.41 36.99 82.05 38.81 Q 82.68 40.63 85.55 41.41 Q 88.41 42.18 89.83 43.38 Q 91.24 44.57 91.24 50.00 Q 91.24 55.43 89.83 56.62 Q 88.41 57.82 85.55 58.59 Q 82.68 59.37 82.05 61.19 Q 81.41 63.01 80.57 64.75 Q 79.74 66.48 81.21 69.06 Q 82.69 71.64 82.85 73.48 Q 83.00 75.32 79.16 79.16 Q 75.32 83.00 73.48 82.85 Q 71.64 82.69 69.06 81.21 Q 66.48 79.74 64.75 80.57 Q 63.01 81.41 61.19 82.05 Q 59.37 82.68 58.59 85.55 Q 57.82 88.41 56.62 89.83 Q 55.43 91.24 50.00 91.24 Q 44.57 91.24 43.38 89.83 Q 42.18 88.41 41.41 85.55 Q 40.63 82.68 38.81 82.05 Q 36.99 81.41 35.25 80.57 Q 33.52 79.74 30.94 81.21 Q 28.36 82.69 26.52 82.85 Q 24.68 83.00 20.84 79.16 Q 17.00 75.32 17.15 73.48 Q 17.31 71.64 18.79 69.06 Q 20.26 66.48 19.43 64.75 Q 18.59 63.01 17.95 61.19 Q 17.32 59.37 14.45 58.59 Q 11.59 57.82 10.17 56.62 Q 8.76 55.43 8.76 50.00 Q 8.76 44.57 10.17 43.38 Q 11.59 42.18 14.45 41.41 Q 17.32 40.63 17.95 38.81 Q 18.59 36.99 19.43 35.25 Q 20.26 33.52 18.79 30.94 Q 17.31 28.36 17.15 26.52 Q 17.00 24.68 20.84 20.84 Q 24.68 17.00 26.52 17.15 Q 28.36 17.31 30.94 18.79 Q 33.52 20.26 35.25 19.43 Z"/><circle cx="50" cy="50" r="19"/></svg><span>設定</span></button><button class="button secondary" id="importBtn" type="button">匯入資料</button><button class="button secondary" id="exportBtn" type="button">匯出備份 ↗</button><button class="button primary" id="addEventTop" type="button">＋ 新增事件</button><input class="hidden" type="file" id="fileInput" accept=".json,application/json" aria-label="匯入備份 JSON"></div>
   <p class="history-header-subtitle">以西元紀年為基礎，從時間看世界，從地區讀脈絡。</p>
  </header>
  <div id="historyCloudState" role="status" aria-live="polite" class="history-cloud-state">正在讀取 Supabase 資料，暫時僅供檢視…</div>
@@ -4052,7 +4100,7 @@ const deepClone=obj=>JSON.parse(JSON.stringify(obj));
 let data=deepClone(DEFAULT_DATA),ui=deepClone(DEFAULT_UI),wikiCandidates=[],toastTimer;
 // CLOUD: Supabase is authoritative. Never hydrate app data from localStorage.
 // For old downloaded HTMLs, the user exports JSON from that origin and imports once here.
-if(![500,200,100,50,20].includes(Number(ui.timeScaleYears)))ui.timeScaleYears=200;
+if(![500,200,100,50,20,10,5].includes(Number(ui.timeScaleYears)))ui.timeScaleYears=200;
 // Non-destructive legacy data migration: preserve existing edits, add v5 seeds, remove requested Exodus seed.
 function upgradeHistoryData(){
  const from=Number(data.version)||1;
@@ -4552,9 +4600,51 @@ function filtered(){let q=ui.text.trim().toLowerCase();let sel=ui.selected;retur
 }).sort((a,b)=>a.start-b.start||(a.end??a.start)-(b.end??b.start));}
 function inWindow(e){return e.start<=ui.end&&effectiveEnd(e)>=ui.start}
 function toggleSelected(id){ui.selected=ui.selected.includes(id)?ui.selected.filter(a=>a!==id):[...ui.selected,id];ui.regionSelectionMode=ui.selected.length?'selected':'none';if(ui.view==='region')ui.focus=id;if(ui.selected.includes('egypt')&&ui.view==='time'&&ui.start>-2686)ui.start=-2800;if(window.innerWidth<=740){const side=document.querySelector('#regionSidebar');if(side)side.classList.remove('expanded');const toggle=document.querySelector('#mobileRegionToggle');if(toggle){toggle.setAttribute('aria-expanded','false');const arrow=toggle.querySelector('.mobile-region-arrow');if(arrow)arrow.textContent='展開 ▾'}}save();render()}
-function renderSidebar(){const n=$('#regionNav');n.innerHTML=data.continents.map(c=>{
- let closed=ui.folded.includes(c.id);return `<div class="continent"><div class="continent-top"><button type="button" class="fold" data-fold="${esc(c.id)}" aria-label="${closed?'展開':'收合'}${esc(c.name)}">${closed?'▸':'▾'}</button><span class="dot" style="background:${esc(c.color)}"></span><button class="continent-name" data-fold="${esc(c.id)}" type="button">${esc(c.name)}</button><button type="button" data-filter="${esc(c.id)}" class="select-continent ${ui.selected.includes(c.id)?'active':''}">整洲</button></div><div class="region-items ${closed?'hidden':''}">${c.children.length?c.children.map(k=>`<button type="button" class="region-chip ${ui.selected.includes(k.id)?'active':''}" data-filter="${esc(k.id)}">${esc(k.name)}</button>`).join(''):'<span style="font-size:11px;color:#b2bcb6">尚無子地區</span>'}</div></div>`}).join('');
- n.querySelectorAll('[data-filter]').forEach(el=>el.onclick=()=>toggleSelected(el.dataset.filter));n.querySelectorAll('[data-fold]').forEach(el=>el.onclick=()=>{let id=el.dataset.fold;ui.folded=ui.folded.includes(id)?ui.folded.filter(v=>v!==id):[...ui.folded,id];save();renderSidebar()});}
+// Presentation-only regions: never rewrite stored event region IDs.
+const HISTORY_GEO_GROUPS=[
+ {id:'east',name:'東歐',ids:['eastern-europe','ukraine','belarus','moldova','romania']},
+ {id:'balkan',name:'巴爾幹半島',ids:['serbia','bosnia','bulgaria','montenegro','croatia','albania','north-macedonia','kosovo']}
+];
+const HISTORY_GEO_PARENT='geo-east-balkans';
+const historyGeoFold={all:true,east:true,balkan:true};
+function historyGeoGroupIds(id){
+ const c=data.continents.find(x=>x.id==='europe');
+ const wanted=id==='all'?HISTORY_GEO_GROUPS.flatMap(g=>g.ids):HISTORY_GEO_GROUPS.find(g=>g.id===id)?.ids||[];
+ return [...new Set(wanted)].filter(r=>c?.children.some(x=>x.id===r));
+}
+function historyGeoVirtualToken(id){return id===HISTORY_GEO_PARENT?'all':id==='geo-east'?'east':id==='geo-balkan'?'balkan':null}
+function historyGeoDisplayName(id){const g=historyGeoVirtualToken(id);return g==='all'?'東歐與巴爾幹':g==='east'?'東歐':g==='balkan'?'巴爾幹半島':nameFor(id)}
+function historyGeoLaneId(id){
+ const group=HISTORY_GEO_GROUPS.find(g=>g.ids.includes(id));if(!group)return id;
+ if(historyGeoFold.all)return HISTORY_GEO_PARENT;
+ return historyGeoFold[group.id]?'geo-'+group.id:id;
+}
+function geoChip(r){return `<button class="region-chip ${ui.selected.includes(r.id)?'active':''}" type="button" data-filter="${esc(r.id)}">${esc(r.name)}</button>`;}
+function geoGroupMarkup(id,name,items,parent=false){
+ const closed=historyGeoFold[id],ids=historyGeoGroupIds(id),selected=ids.length&&ids.every(r=>ui.selected.includes(r));
+ const inner=parent?HISTORY_GEO_GROUPS.map(g=>geoGroupMarkup(g.id,g.name,historyGeoGroupIds(g.id))).join(''):items.map(r=>geoChip(r)).join('');
+ return `<div class="geo-group ${parent?'geo-parent':'geo-child'}"><div class="geo-heading"><button type="button" data-geo-fold="${id}" aria-expanded="${!closed}" aria-label="${closed?'展開':'收合'}${esc(name)}">${closed?'▸':'▾'} ${esc(name)}</button><button type="button" data-geo-filter="${id}" class="geo-filter ${selected?'active':''}" aria-pressed="${!!selected}">篩選</button></div><div class="geo-children ${closed?'hidden':''}">${inner}</div></div>`;
+}
+function renderSidebar(){
+ const n=$('#regionNav');
+ n.innerHTML=data.continents.map(c=>{
+  const closed=ui.folded.includes(c.id);
+  let children=c.children.map(geoChip).join('')||'<span style="font-size:11px;color:#b2bcb6">尚無子地區</span>';
+  if(c.id==='europe'){
+   const grouped=new Set(HISTORY_GEO_GROUPS.flatMap(g=>g.ids));
+   children=c.children.filter(r=>!grouped.has(r.id)).map(geoChip).join('')+geoGroupMarkup('all','東歐與巴爾幹',[],true);
+  }
+  return `<div class="continent"><div class="continent-top"><button type="button" class="fold" data-fold="${esc(c.id)}" aria-label="${closed?'展開':'收合'}${esc(c.name)}">${closed?'▸':'▾'}</button><span class="dot" style="background:${esc(c.color)}"></span><button class="continent-name" data-fold="${esc(c.id)}" type="button">${esc(c.name)}</button><button type="button" data-filter="${esc(c.id)}" class="select-continent ${ui.selected.includes(c.id)?'active':''}">整洲</button></div><div class="region-items ${closed?'hidden':''}">${children}</div></div>`;
+ }).join('');
+ n.querySelectorAll('[data-filter]').forEach(el=>el.onclick=()=>toggleSelected(el.dataset.filter));
+ n.querySelectorAll('[data-fold]').forEach(el=>el.onclick=()=>{const id=el.dataset.fold;ui.folded=ui.folded.includes(id)?ui.folded.filter(v=>v!==id):[...ui.folded,id];save();renderSidebar()});
+ n.querySelectorAll('[data-geo-fold]').forEach(el=>el.onclick=()=>{const id=el.dataset.geoFold;historyGeoFold[id]=!historyGeoFold[id];render()});
+ n.querySelectorAll('[data-geo-filter]').forEach(el=>el.onclick=()=>{
+  const ids=historyGeoGroupIds(el.dataset.geoFilter);if(!ids.length)return;
+  const picked=new Set(ui.selected),all=ids.every(id=>picked.has(id));ids.forEach(id=>all?picked.delete(id):picked.add(id));
+  ui.selected=[...picked];ui.regionSelectionMode=ui.selected.length?'selected':'none';save();render();
+ });
+}
 function setQuickRegion(id){
  if(!data.continents.some(c=>c.children.some(r=>r.id===id)))return;
  ui.selected=ui.selected.includes(id)?ui.selected.filter(v=>v!==id):[...ui.selected,id];
@@ -4581,7 +4671,7 @@ const ERA_PALETTE_GR=['#879cad','#8aabc0','#9b99bd'];
 const ERA_PALETTE_RO=['#aa9982','#8faaa0','#8f9fae','#bd9c83','#8ea4b1'];
 const ERA_PALETTE_FR=['#ae9a8a','#91a7a0','#a9a1b5','#bba58c','#8da8ac','#b2999f','#a5b39e','#94a5ba'];
 const ERA_PALETTE_UK=['#9cae9f','#a99b88','#91a8b1','#b5a2ad','#9db5a3','#ad9d8f','#99abb7','#a9a0b5','#8eaaa7'];
-const SCALE_STEPS=[500,200,100,50,20];
+const SCALE_STEPS=[500,200,100,50,20,10,5];
 const scaleLevel=()=>Math.max(0,SCALE_STEPS.indexOf(Number(ui.timeScaleYears)));
 const getEraViewportWidth=()=>{
  const old=$('#eraScroll');if(old?.clientWidth)return old.clientWidth;
@@ -4592,7 +4682,7 @@ const eraCenturyPixels=()=>100*getEraViewportWidth()/Number(ui.timeScaleYears||2
 const eraTimelineStart=pane=>Number(pane?.dataset.start??ui.start);
 const eraTimelineEnd=pane=>Number(pane?.dataset.end??ui.end);
 const viewportYearFor=(pane,localX)=>eraTimelineStart(pane)+(pane.scrollLeft+localX-(Number(pane.dataset.pad)||0)-22)*100/(Number(pane.dataset.px)||eraCenturyPixels());
-const scaleTickStep=()=>({500:100,200:50,100:20,50:10,20:5})[Number(ui.timeScaleYears)]||50;
+const scaleTickStep=()=>({500:100,200:50,100:20,50:10,20:5,10:2,5:1})[Number(ui.timeScaleYears)]||50;
 let timelinePointerCount=0,timelineGestureWasPinch=false;
 function setTimelineScale(nextIndex, focalYear=null, focalX=null){
  const level=Math.max(0,Math.min(SCALE_STEPS.length-1,Math.round(nextIndex)));
@@ -4616,12 +4706,12 @@ function updateScaleUI(){
  const value=$('#scaleValue');if(value)value.textContent=String(ui.timeScaleYears);
  const less=$('#scaleLess'),more=$('#scaleMore');
  if(less)less.disabled=scaleLevel()===0;
- if(more)more.disabled=scaleLevel()===4;
+ if(more)more.disabled=scaleLevel()===SCALE_STEPS.length-1;
 }
 function closeScaleSheet(){const root=$('#scaleRoot');if(root)root.replaceChildren();document.body.classList.remove('scale-open')}
 function openScaleSheet(){
  const root=$('#scaleRoot');if(!root)return;
- root.innerHTML=`<div id="scaleBackdrop" class="scale-backdrop"><section class="scale-sheet" role="dialog" aria-modal="true" aria-label="時間軸縮放"><button type="button" class="scale-close" id="scaleClose" aria-label="關閉">×</button><h3>時間縮放</h3><div class="scale-status"><strong id="scaleValue">${ui.timeScaleYears}</strong><span>年／目前畫面</span></div><div class="scale-adjust"><button class="scale-stepper" id="scaleLess" type="button" aria-label="縮小時間軸">−</button><input type="range" id="scaleSlider" class="scale-slider" min="0" max="4" step="1" value="${scaleLevel()}" aria-label="選擇每畫面顯示的年數"><button class="scale-stepper" id="scaleMore" type="button" aria-label="放大時間軸">+</button></div><div class="scale-marks">${SCALE_STEPS.map(n=>`<span>${n}</span>`).join('')}</div></section></div>`;
+ root.innerHTML=`<div id="scaleBackdrop" class="scale-backdrop"><section class="scale-sheet" role="dialog" aria-modal="true" aria-label="時間軸縮放"><button type="button" class="scale-close" id="scaleClose" aria-label="關閉">×</button><h3>時間縮放</h3><div class="scale-status"><strong id="scaleValue">${ui.timeScaleYears}</strong><span>年／目前畫面</span></div><div class="scale-adjust"><button class="scale-stepper" id="scaleLess" type="button" aria-label="縮小時間軸">−</button><input type="range" id="scaleSlider" class="scale-slider" min="0" max="${SCALE_STEPS.length-1}" step="1" value="${scaleLevel()}" aria-label="選擇每畫面顯示的年數"><button class="scale-stepper" id="scaleMore" type="button" aria-label="放大時間軸">+</button></div><div class="scale-marks">${SCALE_STEPS.map(n=>`<span>${n}</span>`).join('')}</div></section></div>`;
  $('#scaleClose').onclick=closeScaleSheet;
  $('#scaleBackdrop').onclick=e=>{if(e.target.id==='scaleBackdrop')closeScaleSheet()};
  $('#scaleSlider').oninput=e=>setTimelineScale(Number(e.target.value));
@@ -4735,11 +4825,19 @@ function renderTime(items,opts={}){
   const parent=findContinent(sel);
   return parent?.id===id;
  });
- for(const e of items){for(const id of new Set(Array.isArray(e.regionIds)&&e.regionIds.length?e.regionIds:['other'])){
-  if(!selectedLane(id))continue;
-  if(!groups.has(id))groups.set(id,[]);groups.get(id).push(e);
- }}
- const order=id=>{const c=findContinent(id);if(!c)return 999;let i=data.continents.indexOf(c),j=c.children.findIndex(r=>r.id===id);return i*100+(j<0?0:j+1)};
+ // Collapse only presentation lanes. Keep source event.regionIds unchanged.
+ for(const e of items){
+  const originals=new Set(Array.isArray(e.regionIds)&&e.regionIds.length?e.regionIds:['other']);
+  const visible=new Set([...originals].filter(selectedLane).map(historyGeoLaneId));
+  for(const id of visible){if(!groups.has(id))groups.set(id,[]);groups.get(id).push(e)}
+ }
+ const order=id=>{
+  const virtual=historyGeoVirtualToken(id);
+  if(virtual){const index=data.continents.findIndex(c=>c.id==='europe');return index*100+(virtual==='balkan'?19:18)}
+  const c=findContinent(id);if(!c)return 999;
+  const i=data.continents.indexOf(c),j=c.children.findIndex(r=>r.id===id);
+  return i*100+(j<0?0:j+1);
+ };
  const lanes=[...groups].sort((a,b)=>order(a[0])-order(b[0])).map(([id,events])=>({id,events,periods:events.filter(e=>(e.type==='朝代'||e.type==='歷史時期')&&e.timelineRole!=='event'),points:events.filter(e=>e.timelineRole==='event'||(e.type!=='朝代'&&e.type!=='歷史時期'))}));
  if(!lanes.length){pane.innerHTML='<div class="empty">這個期間沒有符合的歷史資料。可調整年份、地區或新增條目。</div>';return}
  const oldScroller=pane.querySelector('#eraScroll');
@@ -4849,7 +4947,7 @@ function renderTime(items,opts={}){
    const labelSize=width<32?12:width<90?13:16;
    const maxChars=Math.floor((width-5)/(labelSize*0.95));
    const label=maxChars>=shortName.length?shortName:(maxChars>=1?shortName.slice(0,Math.max(1,maxChars)):'');
-   const title=esc(`${name}｜${formatPeriod(e)}｜${nameFor(lane.id)}｜點擊查看／編輯`);
+   const title=esc(`${name}｜${formatPeriod(e)}｜${historyGeoDisplayName(lane.id)}｜點擊查看／編輯`);
    markup+=`<g class="era-period" data-open="${esc(e.id)}" role="button" tabindex="0" aria-label="${title}"><title>${title}</title><rect class="era-period-fill" x="${left.toFixed(1)}" y="${barY}" width="${width.toFixed(1)}" height="${barH}" rx="${isRomanBranch?6:3}" fill="${color}" stroke="#fff" stroke-width="1.8"/>`;
    if(label)markup+=`<text x="${(left+width/2).toFixed(1)}" y="${barY+barH/2+5}" font-size="${labelSize}" font-weight="720" text-anchor="middle" fill="#fff" class="era-segment-text" data-full-label="${esc(shortName)}">${esc(label)}</text>`;
    markup+='</g>';
@@ -4865,7 +4963,7 @@ function renderTime(items,opts={}){
    const startX=xFor(yearA),endX=xFor(yearB),from=Math.min(startX,endX),to=Math.max(startX,endX);
    const hasRange=!e.__clusterIds&&Math.abs(to-from)>4;
    const isCluster=!!e.__clusterIds;
-   const title=esc(isCluster?`包含 ${e.__clusterSize} 個事件｜點擊放大檢視`:`${e.nameZh||e.nameEn}｜${formatPeriod(e)}｜${nameFor(lane.id)}｜點擊查看／編輯`);
+   const title=esc(isCluster?`包含 ${e.__clusterSize} 個事件｜點擊放大檢視`:`${e.nameZh||e.nameEn}｜${formatPeriod(e)}｜${historyGeoDisplayName(lane.id)}｜點擊查看／編輯`);
    const short=(e.shortName||e.nameZh||e.nameEn||'事件');
    const labelText=(e.featured?'★ ':'')+short;
    const label=isCluster?(labelText.length>10?labelText.slice(0,9)+'…':labelText):labelText.length>12?labelText.slice(0,11)+'…':labelText;
@@ -4894,8 +4992,13 @@ function renderTime(items,opts={}){
   markup+=connectors.join('')+eventCards.join('');
  }
  const laneLabels=laneLayout.map(lane=>{
-  const continent=findContinent(lane.id);
-  return `<button class="era-region-label" type="button" data-focus-region="${esc(lane.id)}" style="top:${lane.top+2}px" title="查看${esc(nameFor(lane.id))}的歷史脈絡"><strong>${esc(eraRegionShortName(lane.id))}</strong><small>${esc(continent?.name||'地區')}</small></button>`;
+  const geo=historyGeoVirtualToken(lane.id);
+  const continent=geo?data.continents.find(c=>c.id==='europe'):findContinent(lane.id);
+  const title=historyGeoDisplayName(lane.id);
+  const focus=geo?`data-toggle-geo="${geo}"`:`data-focus-region="${esc(lane.id)}"`;
+  const heading=(geo==='all'||geo==='east')?'東歐':geo==='balkan'?'巴爾幹':esc(eraRegionShortName(lane.id));
+  const sub=geo==='all'?'與巴爾幹 · 展開':geo?'點擊展開':esc(continent?.name||'地區');
+  return `<button class="era-region-label" type="button" ${focus} style="top:${lane.top+2}px" title="${geo?'展開':'查看'}${esc(title)}歷史脈絡"><strong>${heading}</strong><small>${sub}</small></button>`;
  }).join('');
  const jumpOptions=[{year:-2600,name:'古夫金字塔'},{year:-1500,name:'新王國'},{year:-550,name:'波斯第一帝國'},{year:-525,name:'波斯征服埃及'},{year:-490,name:'馬拉松・溫泉關'},{year:-430,name:'伯羅奔尼撒戰爭'},{year:-334,name:'亞歷山大東征'},{year:-330,name:'亞歷山大帝國'},{year:-200,name:'羅馬共和'},{year:395,name:'羅馬分治'},{year:476,name:'西羅馬亡'},{year:1453,name:'東羅馬亡'},{year:650,name:'隋唐'},{year:1500,name:'明清'}];
  const eventCount=laneLayout.reduce((sum,l)=>sum+l.pointLayouts.filter(i=>!i.e.__eraBadge).length,0);
@@ -4956,11 +5059,12 @@ function renderTime(items,opts={}){
  pane.querySelectorAll('[data-open]').forEach(el=>{el.addEventListener('click',()=>openEvent(el.dataset.open));el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openEvent(el.dataset.open)}})});
  pane.querySelectorAll('[data-cluster]').forEach(el=>{
   const record=laneLayout.flatMap(l=>l.pointLayouts).find(item=>item.e.id===el.dataset.cluster);
-  const click=()=>{if(!record)return;setTimelineScale(Math.min(4,scaleLevel()+1),(record.e.start+record.e.end)/2)};
+  const click=()=>{if(!record)return;setTimelineScale(Math.min(SCALE_STEPS.length-1,scaleLevel()+1),(record.e.start+record.e.end)/2)};
   el.addEventListener('click',click);
   el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();click()}});
  });
  pane.querySelectorAll('[data-jump]').forEach(el=>el.addEventListener('click',()=>eraScrollTo(Number(el.dataset.jump))));
+ pane.querySelectorAll('[data-toggle-geo]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.toggleGeo;historyGeoFold[id]=false;render()}));
  pane.querySelectorAll('[data-focus-region]').forEach(el=>el.addEventListener('click',()=>{ui.selected=[el.dataset.focusRegion];save();render()}));
 }
 function enableTimelineDragging(scroller){
@@ -5260,7 +5364,7 @@ $('#openScale').onclick=openScaleSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#scaleBackdrop'))closeScaleSheet();else if($('#modalBackdrop'))closeModal()}});
 window.addEventListener('resize',()=>{clearTimeout(window._eraResize);window._eraResize=setTimeout(()=>{if(ui.view==='time')renderTime(filtered().filter(inWindow),{center:ui.centerYear})},180)});
 
-// v9.2 Cloud 1.0: fail-closed, conflict-checked cloud persistence.
+// v9.2 Cloud 1.7: fail-closed, conflict-checked cloud persistence.
 const HISTORY_PROJECT_URL='https://trkzxallyzaaoaexltwy.supabase.co';
 const HISTORY_PUBLISHABLE_KEY='sb_publishable_rix3nkE5cfvhf66QChzrhg_ieG2Jvri';
 const HISTORY_AUTH_STORAGE='history-timeline-owner-session-v1';
@@ -5295,7 +5399,7 @@ async function historyLoadSnapshot({preserveUi=false}={}){
  historyShadow={events:deepClone(data.events),continents:deepClone(data.continents),ui:deepClone(ui)};
  if(historyOwner){await historyLoadOwnerSettings()}
  render();historyReady=true;historyControls();
- historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · ${historyOwner?'Owner 可編輯':'訪客唯讀'} · v9.2 Cloud 1.0`);
+ historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · ${historyOwner?'Owner 可編輯':'訪客唯讀'} · v9.2 Cloud 1.7`);
 }
 async function historyLoadOwnerSettings(){if(!historyOwner)return;const arr=await historyRequest('/rest/v1/history_settings?select=payload&limit=1',{},true);if(arr.length){ui={...deepClone(DEFAULT_UI),...arr[0].payload};historyShadow.ui=deepClone(ui)}}
 function historyScheduleCommit(){if(!historyOwner||!historyReady)return;clearTimeout(historyCommitTimer);historyCommitTimer=setTimeout(()=>historyCommitNow().catch(e=>notify('同步失敗：'+e.message)),950)}
@@ -5316,7 +5420,7 @@ async function historyCommitNow(){
    historyShadow.events=[...prevEvents.values()];
    if(diff.continents)historyShadow.continents=deepClone(diff.continents);
    if(diff.settings)historyShadow.ui=deepClone(diff.settings);
-   historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · Owner 可編輯 · v9.2 Cloud 1.0`);
+   historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · Owner 可編輯 · v9.2 Cloud 1.7`);
    return historyRemoteVersion;
   }catch(e){historyLastError=e;historyStatus('資料未儲存：'+e.message+'。將重新取得雲端資料。',true);throw e}
  })();
@@ -5434,6 +5538,35 @@ function historyOwnerDialog(){
  }catch(e){notify('登入失敗：'+e.message)}finally{if($('#histLogin'))$('#histLogin').disabled=false}};
 }
 async function historyBoot(){historyReady=false;historyControls();historyStatus('正在讀取 Supabase，暫時只顯示原始範例…');try{await historyLoadSnapshot();if(!await historyConsumeMagicLink()){await historyRestoreOwner();if(!historyOwner)await historyRestoreDevice()}}catch(e){historyStatus('無法連線 Supabase。畫面是本機範例，只供檢視，無法儲存。'+e.message,true);historyReady=false;historyOwner=false;historyControls()}}
+function historySearchDialog(){
+ openModal('搜尋歷史事件','搜尋中文、英文、歷史年代或說明，點選結果即可前往事件。',`<div class="history-search-dialog"><div class="history-search-input-row"><input id="historySearchInput" type="search" autocomplete="off" placeholder="例如：克里米亞、甲午戰爭、1851" aria-label="搜尋歷史事件"><button class="button small" id="historySearchClear" type="button">清除</button></div><div class="history-search-results" id="historySearchResults" aria-live="polite"></div></div>`,'<button class="button primary" id="historySearchDone" type="button">完成</button>');
+ const input=$('#historySearchInput'),results=$('#historySearchResults');
+ input.value=ui.text||'';
+ const matches=()=>{
+  const q=input.value.trim().toLowerCase();
+  if(!q)return [];
+  return data.events.filter(e=>[e.nameZh,e.nameEn,e.shortName,e.type,e.notes,formatPeriod(e),...e.regionIds.map(nameFor)].join(' ').toLowerCase().includes(q)).sort((a,b)=>a.start-b.start).slice(0,40);
+ };
+ function openResult(event){
+  ui.text='';ui.selected=[];ui.regionSelectionMode='all';closeModal();render();
+  if(!applyYearJump(event.start))eraScrollTo(event.start,'auto');
+  openEvent(event.id);
+ }
+ function refresh(){
+  ui.text=input.value;render();
+  const rows=matches();
+  if(!input.value.trim()){results.innerHTML='<p class="form-help">輸入關鍵字後顯示符合的歷史事件。</p>';return}
+  if(!rows.length){results.innerHTML='<p class="form-help">沒有找到符合的事件，請換個關鍵字。</p>';return}
+  results.innerHTML=rows.map(e=>`<button type="button" class="history-search-result" data-history-result="${esc(e.id)}"><strong>${esc(e.nameZh||e.nameEn)}</strong><small>${esc(formatPeriod(e))} · ${esc(e.regionIds.map(nameFor).join('、'))}</small></button>`).join('')+(rows.length===40?'<p class="form-help">顯示前 40 筆，請輸入更精確的名稱。</p>':'');
+  results.querySelectorAll('[data-history-result]').forEach(button=>button.onclick=()=>{const item=data.events.find(e=>e.id===button.dataset.historyResult);if(item)openResult(item)});
+ }
+ input.oninput=refresh;
+ input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();const first=matches()[0];if(first)openResult(first)}};
+ $('#historySearchClear').onclick=()=>{input.value='';refresh();input.focus()};
+ $('#historySearchDone').onclick=closeModal;
+ refresh();input.focus();
+}
+$('#historySearchBtn').onclick=historySearchDialog;
 $('#historySettingsBtn').onclick=historySettingsDialog;
 window.addEventListener('focus',async()=>{if(!historyReady||document.querySelector('#eventForm')||historyInFlight||historyCommitTimer)return;try{const r=await historyRequest('/rest/v1/history_version_state?select=revision&id=eq.true');if(r?.length&&Number(r[0].revision)!==historyRemoteVersion)await historyLoadSnapshot({preserveUi:!historyOwner})}catch(e){historyStatus('同步檢查失敗：'+e.message,true)}});
 historyBoot();
