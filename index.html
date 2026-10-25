@@ -503,6 +503,14 @@ body:not(.history-owner) #deleteEvent,body:not(.history-owner) #saveEvent{displa
  .masthead #historySettingsBtn{grid-column:2;grid-row:1}
  .masthead #addEventTop{grid-column:1 / span 2;grid-row:2}
 }
+.geo-group.geo-parent{background:#f4f8f5;margin-top:7px;border-color:#d2e0d5}
+.geo-parent>.geo-children{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:6px 0}
+.geo-parent>.geo-children.hidden,.geo-child>.geo-children.hidden{display:none}
+.geo-group.geo-child{margin:2px 0 0 9px;background:#fff;border-color:#e0eae3}
+.geo-child>.geo-children{display:flex;flex-wrap:wrap;gap:5px;padding:5px 1px}
+.era-region-label[data-toggle-geo]{background:#ebf3ed;color:#426958;border-left:3px solid #a3c3ad}
+.era-region-label[data-toggle-geo]:hover{background:#dbece0}
+.era-region-label[data-toggle-geo] small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -4808,11 +4816,19 @@ function renderTime(items,opts={}){
   const parent=findContinent(sel);
   return parent?.id===id;
  });
- for(const e of items){for(const id of new Set(Array.isArray(e.regionIds)&&e.regionIds.length?e.regionIds:['other'])){
-  if(!selectedLane(id))continue;
-  if(!groups.has(id))groups.set(id,[]);groups.get(id).push(e);
- }}
- const order=id=>{const c=findContinent(id);if(!c)return 999;let i=data.continents.indexOf(c),j=c.children.findIndex(r=>r.id===id);return i*100+(j<0?0:j+1)};
+ // Collapse only presentation lanes. Keep source event.regionIds unchanged.
+ for(const e of items){
+  const originals=new Set(Array.isArray(e.regionIds)&&e.regionIds.length?e.regionIds:['other']);
+  const visible=new Set([...originals].filter(selectedLane).map(historyGeoLaneId));
+  for(const id of visible){if(!groups.has(id))groups.set(id,[]);groups.get(id).push(e)}
+ }
+ const order=id=>{
+  const virtual=historyGeoVirtualToken(id);
+  if(virtual){const index=data.continents.findIndex(c=>c.id==='europe');return index*100+(virtual==='balkan'?19:18)}
+  const c=findContinent(id);if(!c)return 999;
+  const i=data.continents.indexOf(c),j=c.children.findIndex(r=>r.id===id);
+  return i*100+(j<0?0:j+1);
+ };
  const lanes=[...groups].sort((a,b)=>order(a[0])-order(b[0])).map(([id,events])=>({id,events,periods:events.filter(e=>(e.type==='朝代'||e.type==='歷史時期')&&e.timelineRole!=='event'),points:events.filter(e=>e.timelineRole==='event'||(e.type!=='朝代'&&e.type!=='歷史時期'))}));
  if(!lanes.length){pane.innerHTML='<div class="empty">這個期間沒有符合的歷史資料。可調整年份、地區或新增條目。</div>';return}
  const oldScroller=pane.querySelector('#eraScroll');
@@ -4922,7 +4938,7 @@ function renderTime(items,opts={}){
    const labelSize=width<32?12:width<90?13:16;
    const maxChars=Math.floor((width-5)/(labelSize*0.95));
    const label=maxChars>=shortName.length?shortName:(maxChars>=1?shortName.slice(0,Math.max(1,maxChars)):'');
-   const title=esc(`${name}｜${formatPeriod(e)}｜${nameFor(lane.id)}｜點擊查看／編輯`);
+   const title=esc(`${name}｜${formatPeriod(e)}｜${historyGeoDisplayName(lane.id)}｜點擊查看／編輯`);
    markup+=`<g class="era-period" data-open="${esc(e.id)}" role="button" tabindex="0" aria-label="${title}"><title>${title}</title><rect class="era-period-fill" x="${left.toFixed(1)}" y="${barY}" width="${width.toFixed(1)}" height="${barH}" rx="${isRomanBranch?6:3}" fill="${color}" stroke="#fff" stroke-width="1.8"/>`;
    if(label)markup+=`<text x="${(left+width/2).toFixed(1)}" y="${barY+barH/2+5}" font-size="${labelSize}" font-weight="720" text-anchor="middle" fill="#fff" class="era-segment-text" data-full-label="${esc(shortName)}">${esc(label)}</text>`;
    markup+='</g>';
@@ -4938,7 +4954,7 @@ function renderTime(items,opts={}){
    const startX=xFor(yearA),endX=xFor(yearB),from=Math.min(startX,endX),to=Math.max(startX,endX);
    const hasRange=!e.__clusterIds&&Math.abs(to-from)>4;
    const isCluster=!!e.__clusterIds;
-   const title=esc(isCluster?`包含 ${e.__clusterSize} 個事件｜點擊放大檢視`:`${e.nameZh||e.nameEn}｜${formatPeriod(e)}｜${nameFor(lane.id)}｜點擊查看／編輯`);
+   const title=esc(isCluster?`包含 ${e.__clusterSize} 個事件｜點擊放大檢視`:`${e.nameZh||e.nameEn}｜${formatPeriod(e)}｜${historyGeoDisplayName(lane.id)}｜點擊查看／編輯`);
    const short=(e.shortName||e.nameZh||e.nameEn||'事件');
    const labelText=(e.featured?'★ ':'')+short;
    const label=isCluster?(labelText.length>10?labelText.slice(0,9)+'…':labelText):labelText.length>12?labelText.slice(0,11)+'…':labelText;
@@ -4967,8 +4983,13 @@ function renderTime(items,opts={}){
   markup+=connectors.join('')+eventCards.join('');
  }
  const laneLabels=laneLayout.map(lane=>{
-  const continent=findContinent(lane.id);
-  return `<button class="era-region-label" type="button" data-focus-region="${esc(lane.id)}" style="top:${lane.top+2}px" title="查看${esc(nameFor(lane.id))}的歷史脈絡"><strong>${esc(eraRegionShortName(lane.id))}</strong><small>${esc(continent?.name||'地區')}</small></button>`;
+  const geo=historyGeoVirtualToken(lane.id);
+  const continent=geo?data.continents.find(c=>c.id==='europe'):findContinent(lane.id);
+  const title=historyGeoDisplayName(lane.id);
+  const focus=geo?`data-toggle-geo="${geo}"`:`data-focus-region="${esc(lane.id)}"`;
+  const heading=geo==='all'?'東歐':geo==='balkan'?'巴爾幹':esc(eraRegionShortName(lane.id));
+  const sub=geo==='all'?'與巴爾幹 · 展開':geo?'點擊展開':esc(continent?.name||'地區');
+  return `<button class="era-region-label" type="button" ${focus} style="top:${lane.top+2}px" title="${geo?'展開':'查看'}${esc(title)}歷史脈絡"><strong>${heading}</strong><small>${sub}</small></button>`;
  }).join('');
  const jumpOptions=[{year:-2600,name:'古夫金字塔'},{year:-1500,name:'新王國'},{year:-550,name:'波斯第一帝國'},{year:-525,name:'波斯征服埃及'},{year:-490,name:'馬拉松・溫泉關'},{year:-430,name:'伯羅奔尼撒戰爭'},{year:-334,name:'亞歷山大東征'},{year:-330,name:'亞歷山大帝國'},{year:-200,name:'羅馬共和'},{year:395,name:'羅馬分治'},{year:476,name:'西羅馬亡'},{year:1453,name:'東羅馬亡'},{year:650,name:'隋唐'},{year:1500,name:'明清'}];
  const eventCount=laneLayout.reduce((sum,l)=>sum+l.pointLayouts.filter(i=>!i.e.__eraBadge).length,0);
@@ -5034,6 +5055,7 @@ function renderTime(items,opts={}){
   el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();click()}});
  });
  pane.querySelectorAll('[data-jump]').forEach(el=>el.addEventListener('click',()=>eraScrollTo(Number(el.dataset.jump))));
+ pane.querySelectorAll('[data-toggle-geo]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.toggleGeo;historyGeoFold[id]=false;render()}));
  pane.querySelectorAll('[data-focus-region]').forEach(el=>el.addEventListener('click',()=>{ui.selected=[el.dataset.focusRegion];save();render()}));
 }
 function enableTimelineDragging(scroller){
