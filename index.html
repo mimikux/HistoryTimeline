@@ -4987,7 +4987,7 @@ function renderTime(items,opts={}){
   const continent=geo?data.continents.find(c=>c.id==='europe'):findContinent(lane.id);
   const title=historyGeoDisplayName(lane.id);
   const focus=geo?`data-toggle-geo="${geo}"`:`data-focus-region="${esc(lane.id)}"`;
-  const heading=geo==='all'?'東歐':geo==='balkan'?'巴爾幹':esc(eraRegionShortName(lane.id));
+  const heading=(geo==='all'||geo==='east')?'東歐':geo==='balkan'?'巴爾幹':esc(eraRegionShortName(lane.id));
   const sub=geo==='all'?'與巴爾幹 · 展開':geo?'點擊展開':esc(continent?.name||'地區');
   return `<button class="era-region-label" type="button" ${focus} style="top:${lane.top+2}px" title="${geo?'展開':'查看'}${esc(title)}歷史脈絡"><strong>${heading}</strong><small>${sub}</small></button>`;
  }).join('');
