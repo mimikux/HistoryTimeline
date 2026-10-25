@@ -511,6 +511,15 @@ body:not(.history-owner) #deleteEvent,body:not(.history-owner) #saveEvent{displa
 .era-region-label[data-toggle-geo]{background:#ebf3ed;color:#426958;border-left:3px solid #a3c3ad}
 .era-region-label[data-toggle-geo]:hover{background:#dbece0}
 .era-region-label[data-toggle-geo] small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-search-dialog{display:flex;flex-direction:column;gap:13px}
+.history-search-input-row{display:flex;gap:8px;align-items:center}
+.history-search-input-row input{flex:1;min-width:0;border:1px solid #d5e1d8;background:#f8faf8;border-radius:11px;padding:12px 13px;color:#50685d;outline:none}
+.history-search-input-row input:focus{border-color:#82aa93;box-shadow:0 0 0 3px #89b8a020}
+.history-search-results{max-height:48vh;overflow:auto;display:flex;flex-direction:column;gap:7px}
+.history-search-result{display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:1px solid #e5ece6;background:#fff;border-radius:10px;padding:11px 13px;color:#4e665b;text-align:left;min-width:0}
+.history-search-result:hover{background:#f0f5f1;border-color:#b9d2bf}
+.history-search-result strong{font-size:14px;font-weight:710;overflow-wrap:anywhere}
+.history-search-result small{color:#8b9f94;font-size:11px;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -5529,7 +5538,35 @@ function historyOwnerDialog(){
  }catch(e){notify('登入失敗：'+e.message)}finally{if($('#histLogin'))$('#histLogin').disabled=false}};
 }
 async function historyBoot(){historyReady=false;historyControls();historyStatus('正在讀取 Supabase，暫時只顯示原始範例…');try{await historyLoadSnapshot();if(!await historyConsumeMagicLink()){await historyRestoreOwner();if(!historyOwner)await historyRestoreDevice()}}catch(e){historyStatus('無法連線 Supabase。畫面是本機範例，只供檢視，無法儲存。'+e.message,true);historyReady=false;historyOwner=false;historyControls()}}
-$('#historySearchBtn').onclick=()=>{const q=$('#textSearch');q.scrollIntoView({behavior:'smooth',block:'center'});q.focus({preventScroll:true})};
+function historySearchDialog(){
+ openModal('搜尋歷史事件','搜尋中文、英文、歷史年代或說明，點選結果即可前往事件。',`<div class="history-search-dialog"><div class="history-search-input-row"><input id="historySearchInput" type="search" autocomplete="off" placeholder="例如：克里米亞、甲午戰爭、1851" aria-label="搜尋歷史事件"><button class="button small" id="historySearchClear" type="button">清除</button></div><div class="history-search-results" id="historySearchResults" aria-live="polite"></div></div>`,'<button class="button primary" id="historySearchDone" type="button">完成</button>');
+ const input=$('#historySearchInput'),results=$('#historySearchResults');
+ input.value=ui.text||'';
+ const matches=()=>{
+  const q=input.value.trim().toLowerCase();
+  if(!q)return [];
+  return data.events.filter(e=>[e.nameZh,e.nameEn,e.shortName,e.type,e.notes,formatPeriod(e),...e.regionIds.map(nameFor)].join(' ').toLowerCase().includes(q)).sort((a,b)=>a.start-b.start).slice(0,40);
+ };
+ function openResult(event){
+  ui.text='';ui.selected=[];ui.regionSelectionMode='all';closeModal();render();
+  if(!applyYearJump(event.start))eraScrollTo(event.start,'auto');
+  openEvent(event.id);
+ }
+ function refresh(){
+  ui.text=input.value;render();
+  const rows=matches();
+  if(!input.value.trim()){results.innerHTML='<p class="form-help">輸入關鍵字後顯示符合的歷史事件。</p>';return}
+  if(!rows.length){results.innerHTML='<p class="form-help">沒有找到符合的事件，請換個關鍵字。</p>';return}
+  results.innerHTML=rows.map(e=>`<button type="button" class="history-search-result" data-history-result="${esc(e.id)}"><strong>${esc(e.nameZh||e.nameEn)}</strong><small>${esc(formatPeriod(e))} · ${esc(e.regionIds.map(nameFor).join('、'))}</small></button>`).join('')+(rows.length===40?'<p class="form-help">顯示前 40 筆，請輸入更精確的名稱。</p>':'');
+  results.querySelectorAll('[data-history-result]').forEach(button=>button.onclick=()=>{const item=data.events.find(e=>e.id===button.dataset.historyResult);if(item)openResult(item)});
+ }
+ input.oninput=refresh;
+ input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();const first=matches()[0];if(first)openResult(first)}};
+ $('#historySearchClear').onclick=()=>{input.value='';refresh();input.focus()};
+ $('#historySearchDone').onclick=closeModal;
+ refresh();input.focus();
+}
+$('#historySearchBtn').onclick=historySearchDialog;
 $('#historySettingsBtn').onclick=historySettingsDialog;
 window.addEventListener('focus',async()=>{if(!historyReady||document.querySelector('#eventForm')||historyInFlight||historyCommitTimer)return;try{const r=await historyRequest('/rest/v1/history_version_state?select=revision&id=eq.true');if(r?.length&&Number(r[0].revision)!==historyRemoteVersion)await historyLoadSnapshot({preserveUi:!historyOwner})}catch(e){historyStatus('同步檢查失敗：'+e.message,true)}});
 historyBoot();
