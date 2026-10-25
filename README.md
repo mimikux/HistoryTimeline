@@ -1,31 +1,40 @@
 # History Timeline / History Atlas
 
-**Production**: https://history-timeline-cfb.pages.dev/
+**Production:** https://history-timeline-cfb.pages.dev/
 
-This repository is a **backup of the published frontend**, **not** the live deployment source. The Cloudflare Pages project `history-timeline` remains the production website. Historical records, authenticated edits and application state are stored in Supabase, not in this GitHub backup.
+This repository stores the deployed **frontend and Cloudflare Pages Worker release source** as a recovery backup. It is **not connected as the automatic Cloudflare deployment source**. Cloudflare Pages project `history-timeline` is authoritative; all historic event records, user authentication and owner settings live in Supabase.
 
-## Backup snapshot
+## Current release — 2026-10-25 (Asia/Taipei)
 
-- Source: live Cloudflare production HTTP response for `/`
-- Captured on: 2026-10-24 (Asia/Taipei)
-- UI title: `History Atlas v9.2 Cloud 1.0`
-- Cloudflare header `x-history-build`: `v9.2-cloud-1.6`
-- Current effective frontend: `index.html` (HTML + embedded CSS + JavaScript)
-- Verification: GitHub `index.html` was read back and compared byte-for-byte as text with the captured production HTML.
-- Verified UTF-8 response size: 346,109 bytes
-- Git blob SHA at initial backup: `f5ee3de452d7e4cc554bd8bb0459cc065c2d5aad`
+- Version: **History Atlas v9.2 Cloud 1.7**
+- Production deployment: `c549a2c7-18ff-4391-8f2c-a65e48c34608` (`main`, Cloudflare reports `success`, `uses_functions:true`)
+- Tested deployment candidate: `b1be4381-3283-4bc4-b6a6-9df432897b63` (Preview, `history-v17-release-preview`)
+- Production: https://history-timeline-cfb.pages.dev/
+- GitHub `index.html` blob SHA: `f8a24121306de23745cd9bc78ea37e0e877fb3ce`
+- Full Pages Worker release source: `deployment/_worker.js` (559,360 JavaScript characters).
+- Production Worker responds with `x-history-build: v9.2-cloud-1.7`, serves inline HTML/CSS/JS and preserves direct Supabase client access. `index.html` is the exact client document embedded in the deployed Worker.
+- Prior production rollback reference: `94216ead-8285-4d7d-b628-97178897634c` (Cloud 1.6).
 
-## Maintenance rule
+### Changes in Cloud 1.7
 
-**ChatGPT changes → Cloudflare Preview / Production deployment → verify published site → GitHub backup.**
+1. Expandable East Europe + Balkans geography hierarchy: collapsed single group by default; countries and timeline lanes expand without rewriting source event labels. Greece remains independent.
+2. New magnifier next to settings opens a mobile-safe full search dialog, live event matching and event navigation.
+3. Year zoom sequence: `500, 200, 100, 50, 20, 10, 5`.
 
-1. Cloudflare production is authoritative. **Never** deploy older GitHub content over Cloudflare production.
-2. Save the new exact effective production source to GitHub after a successful release, including updates made through Cloudflare Pages Functions.
-3. Preserve previous GitHub commits and write the production build / deployment reference in the commit message.
-4. Never commit service-role keys, passwords, tokens, email contents or private Supabase records.
-5. Do not modify Supabase production data as part of a frontend backup.
-6. If the Cloudflare connector requires reauthentication, stop without repeatedly prompting or guessing source code. Retrieve the publicly served site if reliable; otherwise report the blocker.
+## Checks and limits
 
-See [CLOUDFLARE-BACKUP.md](CLOUDFLARE-BACKUP.md) for recovery limitations.
+Cloudflare reported a successful Preview and Production deployment with Pages Functions enabled. The source JS was parsed by the Worker compiler as part of the Preview deployment. The repository copy of `index.html` was verified byte-for-byte via GitHub blob SHA against the released candidate. Supabase had **356 events and 5 continents** following release (read-only check); no database migration, update or deletion was run.
 
-**Warning**: This repository was created as **public**. Switch it to Private in GitHub settings if you do not want the source indexed or publicly visible.
+**Browser-based smoke testing / external-site HTML readback were not available to the assistant in this release session**, so do not label these as completed. These should be tested on a browser: geographic folding and its timeline lanes, searching and opening an event, zoom to 5 years, Owner login, writing and reloading a test event.
+
+## Maintenance and recovery
+
+**ChatGPT source change → isolated Cloudflare Preview → deploy `main` → verify release and data → update GitHub backup.** Do not treat Cloudflare's global latest deployment as the current production: a recent Preview may be newer. Check `canonical_deployment`, production environment and branch.
+
+- `index.html`: the visible app including inline CSS and JavaScript.
+- `deployment/_worker.js`: a release-archived, deployable Cloudflare Pages Function wrapper for the exact Cloud 1.7 UI. It was deployed using Pages Direct Upload with an empty asset manifest and the `_worker.js` multipart file.
+- Historic old Worker original source could not be independently read through the Cloudflare Workers Scripts API; Cloud 1.7 contains a newly authored self-contained Worker wrapper replacing its served frontend. Other old, unknown Pages Function routes could not be independently proven equivalent.
+- Repository does not backup Supabase database schema, service secrets, Auth configuration, Supabase Edge Functions, Google Apps Script or Google Drive backup history. Separate backup those systems.
+- See [CLOUDFLARE-BACKUP.md](CLOUDFLARE-BACKUP.md) for limitations and rollback policy.
+
+**Security:** Do not commit service-role keys, private tokens, passwords or personal Supabase records. Repository visibility was previously public; inspect or change to private if you do not want the frontend code publicly indexed.
