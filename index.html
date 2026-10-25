@@ -4583,10 +4583,31 @@ function filtered(){let q=ui.text.trim().toLowerCase();let sel=ui.selected;retur
 }).sort((a,b)=>a.start-b.start||(a.end??a.start)-(b.end??b.start));}
 function inWindow(e){return e.start<=ui.end&&effectiveEnd(e)>=ui.start}
 function toggleSelected(id){ui.selected=ui.selected.includes(id)?ui.selected.filter(a=>a!==id):[...ui.selected,id];ui.regionSelectionMode=ui.selected.length?'selected':'none';if(ui.view==='region')ui.focus=id;if(ui.selected.includes('egypt')&&ui.view==='time'&&ui.start>-2686)ui.start=-2800;if(window.innerWidth<=740){const side=document.querySelector('#regionSidebar');if(side)side.classList.remove('expanded');const toggle=document.querySelector('#mobileRegionToggle');if(toggle){toggle.setAttribute('aria-expanded','false');const arrow=toggle.querySelector('.mobile-region-arrow');if(arrow)arrow.textContent='展開 ▾'}}save();render()}
-// Visual geography groups only; no event IDs, continent schema or cloud rows change.
-const HISTORY_GEO_GROUPS=[{id:'east',name:'東歐',ids:['eastern-europe','poland','czechia']},{id:'balkan',name:'巴爾幹半島',ids:['greece','serbia','romania','bulgaria']}];
-const historyGeoFold={east:true,balkan:true};
+// Presentation-only regions: never rewrite stored event region IDs.
+const HISTORY_GEO_GROUPS=[
+ {id:'east',name:'東歐',ids:['eastern-europe','ukraine','belarus','moldova','romania']},
+ {id:'balkan',name:'巴爾幹半島',ids:['serbia','bosnia','bulgaria','montenegro','croatia','albania','north-macedonia','kosovo']}
+];
+const HISTORY_GEO_PARENT='geo-east-balkans';
+const historyGeoFold={all:true,east:true,balkan:true};
+function historyGeoGroupIds(id){
+ const c=data.continents.find(x=>x.id==='europe');
+ const wanted=id==='all'?HISTORY_GEO_GROUPS.flatMap(g=>g.ids):HISTORY_GEO_GROUPS.find(g=>g.id===id)?.ids||[];
+ return [...new Set(wanted)].filter(r=>c?.children.some(x=>x.id===r));
+}
+function historyGeoVirtualToken(id){return id===HISTORY_GEO_PARENT?'all':id==='geo-east'?'east':id==='geo-balkan'?'balkan':null}
+function historyGeoDisplayName(id){const g=historyGeoVirtualToken(id);return g==='all'?'東歐與巴爾幹':g==='east'?'東歐':g==='balkan'?'巴爾幹半島':nameFor(id)}
+function historyGeoLaneId(id){
+ const group=HISTORY_GEO_GROUPS.find(g=>g.ids.includes(id));if(!group)return id;
+ if(historyGeoFold.all)return HISTORY_GEO_PARENT;
+ return historyGeoFold[group.id]?'geo-'+group.id:id;
+}
 function geoChip(r){return `<button class="region-chip ${ui.selected.includes(r.id)?'active':''}" type="button" data-filter="${esc(r.id)}">${esc(r.name)}</button>`;}
+function geoGroupMarkup(id,name,items,parent=false){
+ const closed=historyGeoFold[id],ids=historyGeoGroupIds(id),selected=ids.length&&ids.every(r=>ui.selected.includes(r));
+ const inner=parent?HISTORY_GEO_GROUPS.map(g=>geoGroupMarkup(g.id,g.name,historyGeoGroupIds(g.id))).join(''):items.map(r=>geoChip(r)).join('');
+ return `<div class="geo-group ${parent?'geo-parent':'geo-child'}"><div class="geo-heading"><button type="button" data-geo-fold="${id}" aria-expanded="${!closed}" aria-label="${closed?'展開':'收合'}${esc(name)}">${closed?'▸':'▾'} ${esc(name)}</button><button type="button" data-geo-filter="${id}" class="geo-filter ${selected?'active':''}" aria-pressed="${!!selected}">篩選</button></div><div class="geo-children ${closed?'hidden':''}">${inner}</div></div>`;
+}
 function renderSidebar(){
  const n=$('#regionNav');
  n.innerHTML=data.continents.map(c=>{
@@ -4594,19 +4615,15 @@ function renderSidebar(){
   let children=c.children.map(geoChip).join('')||'<span style="font-size:11px;color:#b2bcb6">尚無子地區</span>';
   if(c.id==='europe'){
    const grouped=new Set(HISTORY_GEO_GROUPS.flatMap(g=>g.ids));
-   children=c.children.filter(r=>!grouped.has(r.id)).map(geoChip).join('')+HISTORY_GEO_GROUPS.map(g=>{
-    const rows=g.ids.map(id=>c.children.find(r=>r.id===id)).filter(Boolean);if(!rows.length)return '';
-    const closedGroup=historyGeoFold[g.id],allOn=rows.every(r=>ui.selected.includes(r.id));
-    return `<div class="geo-group"><div class="geo-heading"><button type="button" data-geo-fold="${g.id}" aria-expanded="${!closedGroup}">${closedGroup?'▸':'▾'} ${g.name}</button><button type="button" data-geo-filter="${g.id}" class="geo-filter ${allOn?'active':''}">篩選</button></div><div class="geo-children ${closedGroup?'hidden':''}">${rows.map(geoChip).join('')}</div></div>`;
-   }).join('');
+   children=c.children.filter(r=>!grouped.has(r.id)).map(geoChip).join('')+geoGroupMarkup('all','東歐與巴爾幹',[],true);
   }
   return `<div class="continent"><div class="continent-top"><button type="button" class="fold" data-fold="${esc(c.id)}" aria-label="${closed?'展開':'收合'}${esc(c.name)}">${closed?'▸':'▾'}</button><span class="dot" style="background:${esc(c.color)}"></span><button class="continent-name" data-fold="${esc(c.id)}" type="button">${esc(c.name)}</button><button type="button" data-filter="${esc(c.id)}" class="select-continent ${ui.selected.includes(c.id)?'active':''}">整洲</button></div><div class="region-items ${closed?'hidden':''}">${children}</div></div>`;
  }).join('');
  n.querySelectorAll('[data-filter]').forEach(el=>el.onclick=()=>toggleSelected(el.dataset.filter));
  n.querySelectorAll('[data-fold]').forEach(el=>el.onclick=()=>{const id=el.dataset.fold;ui.folded=ui.folded.includes(id)?ui.folded.filter(v=>v!==id):[...ui.folded,id];save();renderSidebar()});
- n.querySelectorAll('[data-geo-fold]').forEach(el=>el.onclick=()=>{const id=el.dataset.geoFold;historyGeoFold[id]=!historyGeoFold[id];renderSidebar()});
+ n.querySelectorAll('[data-geo-fold]').forEach(el=>el.onclick=()=>{const id=el.dataset.geoFold;historyGeoFold[id]=!historyGeoFold[id];render()});
  n.querySelectorAll('[data-geo-filter]').forEach(el=>el.onclick=()=>{
-  const g=HISTORY_GEO_GROUPS.find(v=>v.id===el.dataset.geoFilter),ids=g.ids.filter(id=>data.continents.find(c=>c.id==='europe')?.children.some(r=>r.id===id));
+  const ids=historyGeoGroupIds(el.dataset.geoFilter);if(!ids.length)return;
   const picked=new Set(ui.selected),all=ids.every(id=>picked.has(id));ids.forEach(id=>all?picked.delete(id):picked.add(id));
   ui.selected=[...picked];ui.regionSelectionMode=ui.selected.length?'selected':'none';save();render();
  });
