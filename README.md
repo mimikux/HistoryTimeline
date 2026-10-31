@@ -4,7 +4,18 @@
 
 This repository stores the deployed **frontend and Cloudflare Pages Worker release source** as a recovery backup. It is **not connected as the automatic Cloudflare deployment source**. Cloudflare Pages project `history-timeline` is authoritative; all historic event records, user authentication and owner settings live in Supabase.
 
-## Current release — 2026-10-31 (Asia/Taipei)
+## Current release — 2026-10-31 (Asia/Taipei) · Cloud 1.9
+
+- **Production:** https://history-timeline-cfb.pages.dev/ · **Cloudflare deployment:** `87183b06-4b74-49ec-ad38-cb6c7b075a0c` (environment `production`, branch `main`, `success`, Pages Functions enabled).
+- **Tested Preview:** `726afe3a-5451-4ded-bf75-b5bceba80de4` (branch `history-v19-label-layout-preview`, status `success`).
+- **Rollback to Cloud 1.8:** `d46a7f18-3976-434c-a157-79572cc3107c`.
+- **Frontend backup:** `index.html` Git blob `4e11109a727e947d501fa4e4b67bbc07fc0d3f38`; **exact deployed Worker:** `deployment/_worker.js` blob `8aa44176ead60e224ce3ebfffde597fe478c8a05`.
+- **UI change 1 — consistent West Asia presentation labels:** `persia` displays **伊朗／波斯**, `turkey` displays **土耳其／安那托利亞**, `mesopotamia` displays **伊拉克／兩河流域**. Display labels use modern-place name first and historical geography second, separated by a fullwidth slash. Mesopotamia also spans parts of modern Syria/Turkey; the UI includes a contextual tooltip. Authoritative cloud region names and stable IDs remain **unchanged**, including the underlying `mesopotamia` DB label, and region management editing continues to expose the raw stored label.
+- **UI change 2 — European filter layout:** The ten macro-region chips now use the **same flex-wrap, content-width pill layout as Asian filter regions** on both mobile and desktop. Previously each Europe chip occupied half a grid row. Grouping, timeline logic and source event metadata are preserved.
+- **Safety:** No Supabase database schema, data rows, events, region IDs, settings, auth or Edge Functions were changed by this release. Post-release read-only check: 364 events, 5 continents, global database revision **988** (may change independently of frontend deploy). This version modifies display/CSS/client labels only.
+- **Verification:** Cloudflare compiled and deployed the Preview and Production Worker successfully and made the new Production canonical; source and Worker GitHub `main` copies match the tested Preview by blob SHA. **Real browser visual checks and Owner session testing could not be performed** using the available tools and remain recommended.
+
+## Previous release — 2026-10-31 (Asia/Taipei) · Cloud 1.8
 
 - **Version:** History Atlas v9.2 Cloud 1.8
 - **Production:** [history-timeline-cfb.pages.dev](https://history-timeline-cfb.pages.dev/)
