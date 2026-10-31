@@ -4,7 +4,33 @@
 
 This repository stores the deployed **frontend and Cloudflare Pages Worker release source** as a recovery backup. It is **not connected as the automatic Cloudflare deployment source**. Cloudflare Pages project `history-timeline` is authoritative; all historic event records, user authentication and owner settings live in Supabase.
 
-## Current release — 2026-10-25 (Asia/Taipei)
+## Current release — 2026-10-31 (Asia/Taipei)
+
+- **Version:** History Atlas v9.2 Cloud 1.8
+- **Production:** [history-timeline-cfb.pages.dev](https://history-timeline-cfb.pages.dev/)
+- **Cloudflare production deployment:** `d46a7f18-3976-434c-a157-79572cc3107c`; environment `production`, branch `main`, stage `success`, Pages Functions enabled.
+- **Preview deployment:** `0397cabe-d5f7-4a46-9634-bfc11c14ecda` (`history-v18-macro-final`, `success`).
+- **Rollback candidate:** Cloud 1.7 production `c549a2c7-18ff-4391-8f2c-a65e48c34608`.
+- **GitHub release source:** `index.html` blob `5d7532c262086822a1e8f8186f8013e212f6532e`; exact `deployment/_worker.js` blob `c0778fe50078695abfe6617e268233d0f04e4a6f`.
+- **Supabase post-release read-only check:** 364 events, five continents, global data revision 950. No database edits, migrations or event ID changes were executed.
+
+### UI geography rules
+
+The previous nested East Europe/Balkans fold has been replaced by **ten European display/filter regions**: 英國, 法國, 德意志, 義大利, 西班牙, 低地國, 北歐, 中歐, 東歐 and 巴爾幹半島. All **17 existing** Europe child IDs map to exactly one macro group. Central Europe includes Austria, Czechia, Poland and future Hungary/Slovakia tags; East Europe includes the existing Eastern-Europe ID and future Estonia/Latvia/Lithuania, Belarus, Ukraine and Moldova; Balkan includes Greece, Serbia, Bosnia, Romania, Bulgaria and related countries.
+
+- European sidebar filter and event-edit region checkboxes show macro regions, not all countries.
+- Events with several historic country IDs within one macro group render in **one** regional timeline lane. Cross-macro event relationships remain intact; do not globally deduplicate meaningful cross-region events.
+- Detailed original country IDs and notes remain stored without changes. Editing an existing event and leaving its region group checked retains all historic original region IDs, rather than overwriting them.
+- For **new** events that only select a macro group, `regionIds` contains the macro ID itself (for example, `geo-central`), not an invented specific country. The frontend `findContinent`, `nameFor`, filter, editor and timeline handlers recognize these IDs. The precise place and historical polity belong in `notes`. Do not remove these mappings when updating the app.
+- Non-European continents, search, time zoom, Supabase login/sync and backup/import logic were intentionally retained.
+
+### Verification scope
+
+Static source checks confirmed all 17 existing European region IDs map exactly once, representative synthetic grouping cases pass, and seed/import/auth/database request sections match the previous GitHub source. Cloudflare successfully compiled/created Preview and Production Pages Functions, and Production became the canonical deployment. The GitHub `main` backup HTML and Worker blob SHAs exactly match the verified release candidate.
+
+**Not independently exercised:** external browser rendering, mobile clicks, real Owner authentication and user-initiated save. The assistant's external Page URL fetch was blocked. Cloudflare API `success` confirms deployment/compile, not a real browser functional smoke test.
+
+## Previous release — 2026-10-25 (Asia/Taipei)
 
 - Version: **History Atlas v9.2 Cloud 1.7**
 - Production deployment: `c549a2c7-18ff-4391-8f2c-a65e48c34608` (`main`, Cloudflare reports `success`, `uses_functions:true`)
