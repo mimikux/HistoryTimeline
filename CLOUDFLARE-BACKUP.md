@@ -1,6 +1,40 @@
 # History Timeline — Cloudflare production recovery record
 
-## Current deployment (2026-10-25)
+## Current deployment — 2026-10-31 (Cloud 1.8)
+
+| Field | Verified value |
+|---|---|
+| Pages project | `history-timeline` |
+| Domain | https://history-timeline-cfb.pages.dev/ |
+| Version | `v9.2-cloud-1.8` |
+| Production branch and status | `main`, `success`, `uses_functions:true` |
+| Canonical deployment ID | `d46a7f18-3976-434c-a157-79572cc3107c` |
+| Verified Preview deployment | `0397cabe-d5f7-4a46-9634-bfc11c14ecda` |
+| Previous production / rollback candidate | `c549a2c7-18ff-4391-8f2c-a65e48c34608` |
+| Frontend GitHub blob SHA | `5d7532c262086822a1e8f8186f8013e212f6532e` |
+| Full Worker GitHub blob SHA | `c0778fe50078695abfe6617e268233d0f04e4a6f` |
+| Supabase read-only snapshot | 364 events, 5 continents, revision 950 |
+
+The exact Pages Worker deployed to Preview and Production is archived in `deployment/_worker.js` and embeds `index.html`. The new version changes **only the presentation/frontend behavior**: ten European macro groups, combined regional timeline lanes, and a macro-based event editor which retains original regionIds. A newly created event may use semantic macro IDs such as `geo-central`, `geo-eastern` or `geo-balkans` instead of a falsely precise country ID. These are understood by the new frontend and permitted by the existing backend schema.
+
+### Verification completed
+
+- Preview compiled and deployed successfully; `uses_functions:true`.
+- Production deployed to `main`, became the canonical release and reported `success`, `uses_functions:true`.
+- All 17 historic European child region IDs mapped exactly once. Auth, import, cloud API request, and seed source blocks were unchanged.
+- GitHub `index.html` and `deployment/_worker.js` mirrored exactly and were verified using their Git blob SHAs.
+- Supabase was queried read-only after release. **No production data was changed by this release.**
+
+### Verification still required from a real browser
+
+Open the production URL, check Europe macro filters, same-region de-duplication in the timeline, an existing event's retained precise labels, and an Owner edit-save without changing any original geographic ID. Browser-level checks cannot be claimed complete because external Pages URL requests were blocked by the available tool environment.
+
+### Rollback
+
+Cloud 1.7 deployment `c549a2c7-18ff-4391-8f2c-a65e48c34608` is the last successful Production before this change. Any rollback must be deliberate and scoped to Cloudflare Pages: Supabase is independent and must **not** be rolled back implicitly. Only restore previous release if a regression is confirmed.
+
+
+## Previous deployment (2026-10-25)
 
 | Field | Verified value |
 |---|---|
