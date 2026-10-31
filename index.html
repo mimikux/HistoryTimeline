@@ -4612,17 +4612,24 @@ function inWindow(e){return e.start<=ui.end&&effectiveEnd(e)>=ui.start}
 function toggleSelected(id){ui.selected=ui.selected.includes(id)?ui.selected.filter(a=>a!==id):[...ui.selected,id];ui.regionSelectionMode=ui.selected.length?'selected':'none';if(ui.view==='region')ui.focus=id;if(ui.selected.includes('egypt')&&ui.view==='time'&&ui.start>-2686)ui.start=-2800;if(window.innerWidth<=740){const side=document.querySelector('#regionSidebar');if(side)side.classList.remove('expanded');const toggle=document.querySelector('#mobileRegionToggle');if(toggle){toggle.setAttribute('aria-expanded','false');const arrow=toggle.querySelector('.mobile-region-arrow');if(arrow)arrow.textContent='展開 ▾'}}save();render()}
 // Europe macro-regions are view/filter aliases, NEVER database migrations.
 const HISTORY_EUROPE_GROUPS=[
- {id:'uk',name:'英國',ids:['uk'],fallback:'uk'},
- {id:'france',name:'法國',ids:['france'],fallback:'france'},
- {id:'germany',name:'德意志',ids:['germany'],fallback:'germany'},
- {id:'italy',name:'義大利',ids:['italy'],fallback:'italy'},
- {id:'spain',name:'西班牙',ids:['spain'],fallback:'spain'},
- {id:'geo-lowlands',name:'低地國',ids:['netherlands','belgium'],fallback:'netherlands'},
- {id:'geo-nordic',name:'北歐',ids:['sweden','norway','denmark','finland','iceland'],fallback:'sweden'},
- {id:'geo-central',name:'中歐',ids:['austria','czechia','poland','hungary','slovakia'],fallback:'austria'},
- {id:'geo-eastern',name:'東歐',ids:['eastern-europe','estonia','latvia','lithuania','belarus','ukraine','moldova'],fallback:'eastern-europe'},
- {id:'geo-balkans',name:'巴爾幹半島',ids:['greece','serbia','bosnia','romania','bulgaria','croatia','slovenia','montenegro','albania','north-macedonia','kosovo'],fallback:'serbia'}
+ {id:'uk',name:'英國',ids:['uk']},
+ {id:'france',name:'法國',ids:['france']},
+ {id:'germany',name:'德意志',ids:['germany']},
+ {id:'italy',name:'義大利',ids:['italy']},
+ {id:'spain',name:'西班牙',ids:['spain']},
+ {id:'geo-lowlands',name:'低地國',ids:['netherlands','belgium']},
+ {id:'geo-nordic',name:'北歐',ids:['sweden','norway','denmark','finland','iceland']},
+ {id:'geo-central',name:'中歐',ids:['austria','czechia','poland','hungary','slovakia']},
+ {id:'geo-eastern',name:'東歐',ids:['eastern-europe','estonia','latvia','lithuania','belarus','ukraine','moldova']},
+ {id:'geo-balkans',name:'巴爾幹半島',ids:['greece','serbia','bosnia','romania','bulgaria','croatia','slovenia','montenegro','albania','north-macedonia','kosovo']}
 ];
+const HISTORY_GEO_HINTS={
+ 'geo-lowlands':'荷蘭、比利時',
+ 'geo-nordic':'瑞典、丹麥、挪威、芬蘭、冰島',
+ 'geo-central':'奧地利、捷克、波蘭、匈牙利、斯洛伐克等中歐地區',
+ 'geo-eastern':'波羅的海三國（愛沙尼亞、拉脫維亞、立陶宛）、白俄羅斯、烏克蘭、摩爾多瓦',
+ 'geo-balkans':'塞爾維亞、波士尼亞、保加利亞、羅馬尼亞、希臘等巴爾幹地區'
+};
 function historyEuropeGroupForId(id){return HISTORY_EUROPE_GROUPS.find(g=>g.id===id||g.ids.includes(id))||null}
 function historyGeoLaneId(id){return historyEuropeGroupForId(id)?.id||id}
 function historyGeoDisplayName(id){return historyEuropeGroupForId(id)?.name||nameFor(id)}
@@ -4644,7 +4651,7 @@ function historyRegionMatches(selectedId,regionId){
 }
 function historyEuropeRegionButton(g){
  const active=ui.selected.includes(g.id)||g.ids.some(id=>ui.selected.includes(id));
- return `<button type="button" class="region-chip macro-chip ${active?'active':''}" data-filter="${esc(g.id)}" aria-pressed="${active}" title="${esc(g.ids.filter(id=>data.continents.find(c=>c.id==='europe')?.children.some(r=>r.id===id)).map(nameFor).join('、')||g.name)}">${esc(g.name)}</button>`;
+ return `<button type="button" class="region-chip macro-chip ${active?'active':''}" data-filter="${esc(g.id)}" aria-pressed="${active}" title="${esc(HISTORY_GEO_HINTS[g.id]||g.ids.filter(id=>data.continents.find(c=>c.id==='europe')?.children.some(r=>r.id===id)).map(nameFor).join('、')||g.name)}">${esc(g.name)}</button>`;
 }
 function renderSidebar(){
  const n=$('#regionNav');
@@ -5153,7 +5160,7 @@ function regionEditorHtml(selected){
   const children=c.id==='europe'
    ?HISTORY_EUROPE_GROUPS.map(g=>{
       const active=chosen.has(g.id)||g.ids.some(id=>chosen.has(id));
-      return `<label class="region-option macro-region-option"><input class="event-region" type="checkbox" value="${esc(g.id)}" ${active?'checked':''}><span>${esc(g.name)}</span></label>`;
+      return `<label class="region-option macro-region-option" title="${esc(HISTORY_GEO_HINTS[g.id]||g.name)}"><input class="event-region" type="checkbox" value="${esc(g.id)}" ${active?'checked':''}><span>${esc(g.name)}</span></label>`;
      }).join('')+
      c.children.filter(r=>!HISTORY_EUROPE_GROUPS.some(g=>g.ids.includes(r.id))).map(r=>input(r.id,r.name)).join('')
    :c.children.map(k=>input(k.id,k.name)).join('');
