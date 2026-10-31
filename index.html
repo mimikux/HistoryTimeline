@@ -4595,8 +4595,8 @@ function parseFocusYear(input){
 const effectiveEnd=e=>e.ongoing?Math.max(e.start,new Date().getFullYear()):(e.end??e.start);
 const formatPeriod=e=>e.ongoing?((e.precision==='約'?'約':'')+compactYear(e.start)+' — 至今'):e.precision==='存疑'?(e.candidateYears?.length ? '年代假說：'+e.candidateYears.map(compactYear).join('／') : '年代存疑：'+compactYear(e.start)+(e.end!=null?'～'+compactYear(e.end):'')) : (e.precision==='約'?'約':'')+compactYear(e.start)+(e.end!=null&&e.end!==e.start?' — '+compactYear(e.end):'')+'年';
 const astro=y=>y<0?y+1:y;const unAstro=y=>y<=0?y-1:y;
-const findContinent=id=>data.continents.find(c=>c.id===id)||data.continents.find(c=>c.children.some(x=>x.id===id));
-const nameFor=id=>{let c=data.continents.find(c=>c.id===id);if(c)return c.name;for(let x of data.continents){let r=x.children.find(r=>r.id===id);if(r)return r.name}return id};
+const findContinent=id=>data.continents.find(c=>c.id===id)||data.continents.find(c=>c.children.some(x=>x.id===id))||(HISTORY_EUROPE_GROUPS.some(g=>g.id===id)?data.continents.find(c=>c.id==='europe'):null);
+const nameFor=id=>{let c=data.continents.find(c=>c.id===id);if(c)return c.name;for(let x of data.continents){let r=x.children.find(r=>r.id===id);if(r)return r.name}return HISTORY_EUROPE_GROUPS.find(g=>g.id===id)?.name||id};
 const colorFor=e=>findContinent(e.regionIds?.[0])?.color||'#8fa69e';
 const eraRegionShortName=id=>({turkey:'土耳其',mesopotamia:'兩河流域',persia:'伊朗／波斯','arabian-peninsula':'阿拉伯半島'}[id]||nameFor(id));
 function save(){if(historyReady&&historyOwner)historyScheduleCommit();}
@@ -4638,7 +4638,7 @@ function historyRegionMatches(selectedId,regionId){
  if(group)return group.ids.includes(regionId);
  const c=data.continents.find(c=>c.id===selectedId);
  if(c)return c.children.some(r=>r.id===regionId)||
-   (selectedId==='europe'&&HISTORY_EUROPE_GROUPS.some(g=>g.ids.includes(regionId)));
+   (selectedId==='europe'&&HISTORY_EUROPE_GROUPS.some(g=>g.id===regionId||g.ids.includes(regionId)));
  const parent=findContinent(selectedId);
  return !!parent&&parent.id===regionId;
 }
@@ -5137,8 +5137,9 @@ function historyResolveEditorRegionIds(checked,original=[]){
  for(const id of selected){
   const group=HISTORY_EUROPE_GROUPS.find(g=>g.id===id);
   if(!group){out.push(id);continue}
-  const originalMembers=old.filter(r=>group.ids.includes(r));
-  out.push(...(originalMembers.length?originalMembers:[group.fallback]));
+  const originalMembers=old.filter(r=>group.ids.includes(r)||r===group.id);
+  // New events store the macro ID itself, never a falsely precise country ID.
+  out.push(...(originalMembers.length?originalMembers:[group.id]));
  }
  // Keep original ID order whenever the visible region choices have not changed.
  const resolved=new Set(out);
