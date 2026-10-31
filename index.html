@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f5f3ef">
-<meta name="history-build" content="v9.2-cloud-1.8">
-<title>歷史時空軸 · History Atlas v9.2 Cloud 1.8</title>
+<meta name="history-build" content="v9.2-cloud-1.9">
+<title>歷史時空軸 · History Atlas v9.2 Cloud 1.9</title>
 <style>
 :root{color-scheme:light;--ink:#3c4850;--muted:#819098;--line:#e5e7e3;--bg:#f5f3ef;--paper:#fff;--sage:#8fa69e;--blue:#8fa6b5;--sand:#b8a58c;--rose:#bc9d98;--purple:#aaa0b4;--shadow:0 14px 45px rgba(61,71,73,.055)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:14px;line-height:1.55}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #839faf;outline-offset:2px}a{color:#5d8191;text-decoration:none}a:hover{text-decoration:underline}
@@ -522,16 +522,16 @@ body:not(.history-owner) #deleteEvent,body:not(.history-owner) #saveEvent{displa
 .history-search-result small{color:#8b9f94;font-size:11px;overflow-wrap:anywhere}
 
 /* Cloud 1.8: European macro-regions, preserving granular database IDs. */
-.macro-region-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding-left:18px}
-.macro-region-items .macro-chip{width:100%;min-width:0;text-align:center;white-space:normal;line-height:1.25;font-size:12px;min-height:34px}
-.macro-region-items .geo-sidebar-note{grid-column:1/-1;margin:5px 0 0;color:#99a9a1;font-size:10px;line-height:1.55}
+.macro-region-items{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;padding:4px 0 1px 19px}
+.macro-region-items .macro-chip{flex:0 0 auto;width:auto;min-width:0;text-align:left;white-space:nowrap;line-height:normal;font-size:12px;min-height:0;padding:6px 9px}
+.macro-region-items .geo-sidebar-note{flex:1 0 100%;margin:5px 0 0;color:#99a9a1;font-size:10px;line-height:1.55}
 .macro-lane-label{background:#f0f5f1;color:#4b6a5b}
 .macro-lane-label:hover{background:#e2eee7}
 .macro-lane-label strong{max-width:100%;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.12}
 .geo-edit-help,.geo-saved-details{font-size:11px;line-height:1.7;color:#7f9388;margin:5px 0 8px}
 .geo-saved-details{padding:9px 11px;background:#f6f9f5;border-radius:9px;border:1px solid #e6ece7}
 #regionSidebar .region-items.macro-region-items.hidden{display:none}
-@media(max-width:740px){.macro-region-items{grid-template-columns:repeat(2,minmax(0,1fr))}.geo-edit-help,.geo-saved-details{font-size:11px}}
+@media(max-width:740px){.macro-region-items{padding:0 0 0 13px}.geo-edit-help,.geo-saved-details{font-size:11px}}
 </style>
 </head>
 <body>
@@ -4596,7 +4596,10 @@ const effectiveEnd=e=>e.ongoing?Math.max(e.start,new Date().getFullYear()):(e.en
 const formatPeriod=e=>e.ongoing?((e.precision==='約'?'約':'')+compactYear(e.start)+' — 至今'):e.precision==='存疑'?(e.candidateYears?.length ? '年代假說：'+e.candidateYears.map(compactYear).join('／') : '年代存疑：'+compactYear(e.start)+(e.end!=null?'～'+compactYear(e.end):'')) : (e.precision==='約'?'約':'')+compactYear(e.start)+(e.end!=null&&e.end!==e.start?' — '+compactYear(e.end):'')+'年';
 const astro=y=>y<0?y+1:y;const unAstro=y=>y<=0?y-1:y;
 const findContinent=id=>data.continents.find(c=>c.id===id)||data.continents.find(c=>c.children.some(x=>x.id===id))||(HISTORY_EUROPE_GROUPS.some(g=>g.id===id)?data.continents.find(c=>c.id==='europe'):null);
-const nameFor=id=>{let c=data.continents.find(c=>c.id===id);if(c)return c.name;for(let x of data.continents){let r=x.children.find(r=>r.id===id);if(r)return r.name}return HISTORY_EUROPE_GROUPS.find(g=>g.id===id)?.name||id};
+// These are presentation labels only. Never rewrite authoritative Supabase region IDs/names.
+const HISTORY_ASIAN_REGION_LABELS=Object.freeze({persia:'伊朗／波斯',turkey:'土耳其／安那托利亞',mesopotamia:'伊拉克／兩河流域'});
+const HISTORY_ASIAN_REGION_HINTS=Object.freeze({mesopotamia:'兩河流域以現今伊拉克為核心，亦包含敘利亞、土耳其部分地區；不等同現代國界。',turkey:'安那托利亞是歷史地理區域，與現代土耳其國界不完全相同。',persia:'波斯為歷史地理與文化稱呼，與現代伊朗並非所有時代都完全對應。'});
+const nameFor=id=>{if(Object.prototype.hasOwnProperty.call(HISTORY_ASIAN_REGION_LABELS,id))return HISTORY_ASIAN_REGION_LABELS[id];let c=data.continents.find(c=>c.id===id);if(c)return c.name;for(let x of data.continents){let r=x.children.find(r=>r.id===id);if(r)return r.name}return HISTORY_EUROPE_GROUPS.find(g=>g.id===id)?.name||id};
 const colorFor=e=>findContinent(e.regionIds?.[0])?.color||'#8fa69e';
 const eraRegionShortName=id=>({turkey:'土耳其',mesopotamia:'兩河流域',persia:'伊朗／波斯','arabian-peninsula':'阿拉伯半島'}[id]||nameFor(id));
 function save(){if(historyReady&&historyOwner)historyScheduleCommit();}
@@ -4657,7 +4660,7 @@ function renderSidebar(){
  const n=$('#regionNav');
  n.innerHTML=data.continents.map(c=>{
   const closed=ui.folded.includes(c.id);
-  let children=c.children.length?c.children.map(k=>`<button type="button" class="region-chip ${ui.selected.includes(k.id)?'active':''}" data-filter="${esc(k.id)}" aria-pressed="${ui.selected.includes(k.id)}">${esc(k.name)}</button>`).join(''):'<span style="font-size:11px;color:#b2bcb6">尚無子地區</span>';
+  let children=c.children.length?c.children.map(k=>`<button type="button" class="region-chip ${ui.selected.includes(k.id)?'active':''}" data-filter="${esc(k.id)}" aria-pressed="${ui.selected.includes(k.id)}" title="${esc(HISTORY_ASIAN_REGION_HINTS[k.id]||nameFor(k.id))}">${esc(nameFor(k.id))}</button>`).join(''):'<span style="font-size:11px;color:#b2bcb6">尚無子地區</span>';
   if(c.id==='europe'){
    const mapped=new Set(HISTORY_EUROPE_GROUPS.flatMap(g=>g.ids));
    const extras=c.children.filter(k=>!mapped.has(k.id)).map(k=>`<button type="button" class="region-chip ${ui.selected.includes(k.id)?'active':''}" data-filter="${esc(k.id)}">${esc(k.name)}</button>`).join('');
@@ -5127,7 +5130,7 @@ function enableTimelineDragging(scroller){
   }
  });
 }
-function renderRegion(items){const pane=$('#mainContent');let options=data.continents.map(c=>`<optgroup label="${esc(c.name)}"><option value="${esc(c.id)}" ${ui.focus===c.id?'selected':''}>${esc(c.name)} · 全洲</option>${c.children.map(k=>`<option value="${esc(k.id)}" ${ui.focus===k.id?'selected':''}>${esc(k.name)}</option>`).join('')}</optgroup>`).join('');
+function renderRegion(items){const pane=$('#mainContent');let options=data.continents.map(c=>`<optgroup label="${esc(c.name)}"><option value="${esc(c.id)}" ${ui.focus===c.id?'selected':''}>${esc(c.name)} · 全洲</option>${c.children.map(k=>`<option value="${esc(k.id)}" ${ui.focus===k.id?'selected':''}>${esc(nameFor(k.id))}</option>`).join('')}</optgroup>`).join('');
  if(!data.continents.some(c=>c.id===ui.focus||c.children.some(k=>k.id===ui.focus)))ui.focus='china';
  const matching=items.filter(e=>{const c=data.continents.find(c=>c.id===ui.focus);return c?e.regionIds.some(r=>r===c.id||c.children.some(k=>k.id===r)):e.regionIds.includes(ui.focus)||(findContinent(ui.focus)&&e.regionIds.includes(findContinent(ui.focus).id))});
  $('#countLabel').textContent=`${matching.length} 個條目`;
@@ -5163,7 +5166,7 @@ function regionEditorHtml(selected){
       return `<label class="region-option macro-region-option" title="${esc(HISTORY_GEO_HINTS[g.id]||g.name)}"><input class="event-region" type="checkbox" value="${esc(g.id)}" ${active?'checked':''}><span>${esc(g.name)}</span></label>`;
      }).join('')+
      c.children.filter(r=>!HISTORY_EUROPE_GROUPS.some(g=>g.ids.includes(r.id))).map(r=>input(r.id,r.name)).join('')
-   :c.children.map(k=>input(k.id,k.name)).join('');
+   :c.children.map(k=>input(k.id,nameFor(k.id))).join('');
   return `<section class="region-check-group"><h4><span class="dot" style="background:${esc(c.color)}"></span>${esc(c.name)}</h4><div class="region-check-group-options">${whole}${children}</div></section>`;
  }).join('');
  const specific=(selected||[]).filter(id=>data.continents.some(c=>c.children.some(r=>r.id===id))).map(nameFor);
@@ -5415,7 +5418,7 @@ $('#openScale').onclick=openScaleSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#scaleBackdrop'))closeScaleSheet();else if($('#modalBackdrop'))closeModal()}});
 window.addEventListener('resize',()=>{clearTimeout(window._eraResize);window._eraResize=setTimeout(()=>{if(ui.view==='time')renderTime(filtered().filter(inWindow),{center:ui.centerYear})},180)});
 
-// v9.2 Cloud 1.8: fail-closed, conflict-checked cloud persistence.
+// v9.2 Cloud 1.9: fail-closed, conflict-checked cloud persistence.
 const HISTORY_PROJECT_URL='https://trkzxallyzaaoaexltwy.supabase.co';
 const HISTORY_PUBLISHABLE_KEY='sb_publishable_rix3nkE5cfvhf66QChzrhg_ieG2Jvri';
 const HISTORY_AUTH_STORAGE='history-timeline-owner-session-v1';
@@ -5450,7 +5453,7 @@ async function historyLoadSnapshot({preserveUi=false}={}){
  historyShadow={events:deepClone(data.events),continents:deepClone(data.continents),ui:deepClone(ui)};
  if(historyOwner){await historyLoadOwnerSettings()}
  render();historyReady=true;historyControls();
- historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · ${historyOwner?'Owner 可編輯':'訪客唯讀'} · v9.2 Cloud 1.8`);
+ historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · ${historyOwner?'Owner 可編輯':'訪客唯讀'} · v9.2 Cloud 1.9`);
 }
 async function historyLoadOwnerSettings(){if(!historyOwner)return;const arr=await historyRequest('/rest/v1/history_settings?select=payload&limit=1',{},true);if(arr.length){ui={...deepClone(DEFAULT_UI),...arr[0].payload};historyShadow.ui=deepClone(ui)}}
 function historyScheduleCommit(){if(!historyOwner||!historyReady)return;clearTimeout(historyCommitTimer);historyCommitTimer=setTimeout(()=>historyCommitNow().catch(e=>notify('同步失敗：'+e.message)),950)}
@@ -5471,7 +5474,7 @@ async function historyCommitNow(){
    historyShadow.events=[...prevEvents.values()];
    if(diff.continents)historyShadow.continents=deepClone(diff.continents);
    if(diff.settings)historyShadow.ui=deepClone(diff.settings);
-   historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · Owner 可編輯 · v9.2 Cloud 1.8`);
+   historyStatus(`${data.events.length} 筆歷史資料 · Supabase 已同步 · Owner 可編輯 · v9.2 Cloud 1.9`);
    return historyRemoteVersion;
   }catch(e){historyLastError=e;historyStatus('資料未儲存：'+e.message+'。將重新取得雲端資料。',true);throw e}
  })();
